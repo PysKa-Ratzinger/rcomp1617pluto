@@ -1,4 +1,8 @@
+#pragma once
+
 #include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
  *   Creates 'num' child processes and returns 0 for the parent
@@ -8,3 +12,8 @@
  * that were created up to that point.
  */
 int create_childs(int num);
+
+/**
+ *   Executes a command and returns the output for reading
+ */
+int pipesystem(char *cmd);

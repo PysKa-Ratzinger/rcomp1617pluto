@@ -19,7 +19,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define BUFFER_SIZE 256
 #define BCAST_ADDRESS "255.255.255.255"
 #define APP_PORT "32033"
 #define INTERVAL 30
