@@ -12,7 +12,7 @@ int create_childs(int num){
   return 0;
 }
 
-int pipesystem(char *cmd){
+int psystem(char *cmd){
   int fd[2];
 
   if(pipe(fd) == -1){

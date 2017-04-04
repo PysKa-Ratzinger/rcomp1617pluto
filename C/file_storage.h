@@ -38,6 +38,10 @@ struct file_info{
  *  and returned.
  *    The structure will also already have initialized a linked list where
  *  information about every file in the folder will be in.
+ *
+ *  RETURN VALUE:
+ *    On success, returns a pointer to a valid file_storage structure. On
+ *  error, return NULL.
  */
 struct file_storage* createfsinfo(char* folder_name);
 
@@ -45,14 +49,22 @@ struct file_storage* createfsinfo(char* folder_name);
  *    For a given file_storage structure, an update involves deleting the
  *  file_info linked list completely and remaking it in. That's what happens
  *  to the file_storage structure passed as an argument to this function.
+ *
+ *  RETURN VALUE:
+ *    On success, 0 will be returned. In case of error, -1 is returned
+ *  instead.
  */
-void updatefs(struct file_storage* storage);
+int updatefs(struct file_storage* storage);
 
 /**
  *    Frees all the allocated memory used by the linked list structure inside
  *  the file_storage structure passed as an argument
+ *
+ *  RETURN VALUE:
+ *    On success, 0 will be returned. In case of error, -1 is returned
+ *  instead.
  */
-void cleanfs(struct file_storage* storage);
+int cleanfs(struct file_storage* storage);
 
 /**
  *    Frees all the allocated memory used by the file_storage structure passed

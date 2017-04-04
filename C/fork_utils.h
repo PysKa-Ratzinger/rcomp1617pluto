@@ -16,4 +16,4 @@ int create_childs(int num);
 /**
  *   Executes a command and returns the output for reading
  */
-int pipesystem(char *cmd);
+int psystem(char *cmd);
