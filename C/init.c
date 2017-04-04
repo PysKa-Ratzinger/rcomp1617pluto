@@ -1,10 +1,8 @@
 #include "init.h"
 
 void init(struct main_var *vars){
-  struct addrinfo hints;
-  struct addrinfo *list, *rq;
-  int err, sock, opt;
-  char buffer[BUFFER_SIZE];
+  struct addrinfo hints, *list;
+  int err;
 
   // BROADCAST ADDRESS
 
@@ -17,13 +15,23 @@ void init(struct main_var *vars){
   if(err != 0){
     fprintf(stderr, "failed to get broadcast address: %s\n",
         gai_strerror(err));
-    freeaddrinfo(list);
     exit(EXIT_FAILURE);
   }
 
   vars->bcast_addrlen = list->ai_addrlen;
   memcpy(&vars->bcast_addr, list->ai_addr, list->ai_addrlen);
   freeaddrinfo(list);
+
+  err = init_stage1(vars);
+
+  if(err == -1){
+    exit(EXIT_FAILURE);
+  }
+}
+
+int init_stage1(struct main_var *vars){
+  struct addrinfo hints, *list, *rq;
+  int err, sock, opt;
 
   // BROADCAST LISTENING SOCKET
 
@@ -36,8 +44,7 @@ void init(struct main_var *vars){
 
   if(err != 0){
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
-    freeaddrinfo(list);
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
   for(rq = list; rq != NULL; rq = rq->ai_next){
@@ -53,19 +60,37 @@ void init(struct main_var *vars){
 
   if(rq == NULL){ // No address succeded
     fprintf(stderr, "Could not bind.\n");
-    exit(EXIT_FAILURE);
+    return -1;
   }
+
+  freeaddrinfo(list); // no longer needed
 
   opt = 1;
   err = setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(opt));
 
   if(err == -1){
     perror("setsockopt");
-    exit(EXIT_FAILURE);
+    close(sock);
+    return -1;
   }
 
   vars->sock_udp = sock;
-  freeaddrinfo(list);
+
+  err = init_stage2(vars);
+
+  if(err == -1){
+    close(sock);
+    return -1;
+  }
+
+  return 0;
+}
+
+int init_stage2(struct main_var *vars){
+  struct sockaddr_in sin;
+  struct addrinfo hints, *list, *rq;
+  socklen_t len;
+  int err, sock, opt;
 
   // TCP FILE TRANSFER SOCKET
 
@@ -78,9 +103,7 @@ void init(struct main_var *vars){
 
   if(err != 0){
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
-    close(vars->sock_udp);
-    freeaddrinfo(list);
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
   for(rq = list; rq != NULL; rq = rq->ai_next){
@@ -96,28 +119,34 @@ void init(struct main_var *vars){
 
   if(rq == NULL){
     fprintf(stderr, "Could not bind.\n");
-    close(vars->sock_udp);
-    freeaddrinfo(list);
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
-  opt = 1;
-  err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-  if(err == -1){
-    perror("setsockopt");
-    exit(EXIT_FAILURE);
-  }
-
-  err = getnameinfo(rq->ai_addr, rq->ai_addrlen, NULL, 0,
-                    buffer, BUFFER_SIZE, NI_NUMERICSERV);
-
-  if(err != 0){
-    perror("getnameinfo");
-    exit(EXIT_FAILURE);
-  }
-
-  vars->tcp_port = atoi(buffer);
-  vars->sock_ft = sock;
   freeaddrinfo(list);
-}
 
+  for(;;){
+    opt = 1;
+    err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    if(err == -1){ perror("setsockopt"); break; }
+
+    err = listen(sock, MAX_TCP_CONN);
+    if(err == -1) { perror("listen"); break; }
+
+    len = sizeof(sin);
+    err = getsockname(sock, (struct sockaddr*)&sin, &len);
+    if(err == -1) { perror("getsockname"); break; }
+
+    vars->tcp_port = ntohs(sin.sin_port);
+
+    break;  // Infinite loop runs only once
+  }
+
+  if(err == -1){
+    close(sock);
+    return -1;
+  }
+
+  vars->sock_ft = sock;
+
+  return 0;
+}

@@ -7,10 +7,19 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include "init.h"
+#include "fork_utils.h"
+
+static struct main_var vars;
+
+void ctrl_c_handler(int signal){
+  close(vars.sock_udp);
+  close(vars.sock_ft);
+  exit(EXIT_SUCCESS);
+}
 
 int main(){
-  struct main_var vars;
   ssize_t nbyte;
   int i;
   char buffer[BUFFER_SIZE];
@@ -31,4 +40,3 @@ int main(){
 
   return 0;
 }
-

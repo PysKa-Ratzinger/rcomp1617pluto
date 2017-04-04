@@ -24,6 +24,7 @@
 #define APP_PORT "32033"
 #define INTERVAL 30
 #define TIMEOUT  45
+#define MAX_TCP_CONN 50
 
 struct main_var{
   struct sockaddr_in bcast_addr;  // broadcast address
@@ -34,4 +35,5 @@ struct main_var{
 };
 
 void init(struct main_var *vars);
-
+int init_stage1(struct main_var *vars);
+int init_stage2(struct main_var *vars);
