@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 static const int BUFFER_SIZE = 512;
 
@@ -28,6 +29,7 @@ struct file_storage* createfsinfo(char* folder_name){
 }
 
 int updatefs(struct file_storage* storage){
+  struct stat sb;
   int fd, len;
   off_t offset;
   ssize_t nbyte;
@@ -41,22 +43,22 @@ int updatefs(struct file_storage* storage){
   folder[len] = '\0';
   file = folder + len;
 
-  // TODO: Check stat of found file to see if it is a regular file
-
   offset = 0;
   curr = next = NULL;
   sprintf(buffer, "ls -p %s | grep -v /", storage->f_folder);
   fd = psystem(buffer);
 
   while(1){
-    nbyte = pread(fd, buffer, 1, offset);
+    nbyte = pread(fd, file, 1, offset);
     if(nbyte == -1) break;
 
-    if(buffer[offset] != '\n'){
-      offset++;
-    }else{
-      buffer[offset] = 0;
-      next->f_bytes = offset;
+    if(file[offset] != '\n'){
+      file[offset] = 0;
+
+      if(!(stat(folder, &sb) == 0 && S_ISREG(sb.st_mode))){
+        offset = 0;
+        continue;  // Read file is not a regular file
+      }
 
       next = malloc(sizeof(struct file_info));
       if(next == NULL){
@@ -67,6 +69,7 @@ int updatefs(struct file_storage* storage){
       /* Takes care of uninitialized member variables */
       memset(next, 0, sizeof(struct file_info));
 
+      next->f_bytes = offset;
       next->f_name = malloc(next->f_bytes + 1); // +1 for null terminator
       if(next->f_name == NULL){
         free(next);
@@ -79,6 +82,9 @@ int updatefs(struct file_storage* storage){
       else
         curr->f_next = next;
       curr = next;
+      offset = 0;
+    }else{
+      offset++;
     }
   }
 

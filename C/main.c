@@ -18,6 +18,7 @@
 static struct main_var vars;
 
 void ctrl_c_handler(int signal){
+  (void)signal;
   printf("\nInterrupt detected... cleaning up.\n");
   close(vars.sock_udp);
   close(vars.sock_ft);
@@ -27,7 +28,7 @@ void ctrl_c_handler(int signal){
 int main(){
   struct stat sb;
   ssize_t nbyte;
-  int i, err, fd;
+  int i, err;
   char buffer[BUFFER_SIZE];
   char folder[BUFFER_SIZE];
 

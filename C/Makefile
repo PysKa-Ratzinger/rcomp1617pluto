@@ -1,3 +1,6 @@
+CC=gcc
+CFLAGS=-Wall -Wextra
+
 main: main.o init.o fork_utils.o file_storage.o 
 
 init.o: init.c init.h 
