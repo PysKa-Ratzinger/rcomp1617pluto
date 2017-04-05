@@ -34,11 +34,14 @@ int psystem(char *cmd){
       return fd[0];
 
     case 1: /* child process */
-      dup2(fd[1], 1);
       close(fd[0]);
+      dup2(fd[1], 1);
       close(fd[1]);
       execl("/bin/sh", "sh", "-c", cmd, (char *)0);
       perror("execl");
+      exit(EXIT_FAILURE);
+
+    default:
       exit(EXIT_FAILURE);
   }
 }

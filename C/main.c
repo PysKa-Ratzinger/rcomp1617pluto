@@ -7,22 +7,33 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
 
 #include "init.h"
 #include "fork_utils.h"
+#include "file_storage.h"
+#include "broadcast.h"
 
 #define BUFFER_SIZE 256
 
 static struct main_var vars;
+static int child_pid = 0;
 
 void ctrl_c_handler(int signal){
   (void)signal;
   printf("\nInterrupt detected... cleaning up.\n");
+  exit(EXIT_SUCCESS);
+}
+
+void cleanup(){
   close(vars.sock_udp);
   close(vars.sock_ft);
-  exit(EXIT_SUCCESS);
+  freefsinfo(vars.storage);
+  if(getpid() != child_pid){
+    kill(child_pid, SIGTERM);
+  }
 }
 
 int main(){
@@ -34,6 +45,11 @@ int main(){
 
   if(signal(SIGINT, ctrl_c_handler) == SIG_ERR){
     fprintf(stderr, "Could not set-up interrupt handler.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  if(atexit(cleanup) != 0){
+    perror("atexit");
     exit(EXIT_FAILURE);
   }
 
@@ -49,28 +65,28 @@ int main(){
     if(stat(folder, &sb) == 0 && S_ISDIR(sb.st_mode))
       break;  // Successfully read a folder
 
-    printf("Please insert a valid path for a folder."
+    printf("Please insert a valid path for a folder. "
             "Has to be a full path.\n>");
   }
 
-  snprintf(buffer, BUFFER_SIZE, "ls -p %s | grep -v /", folder);
-  system(buffer);
-  printf("Broadcasting folder \"%s\" over the network... ", folder);
-  fflush(stdout);
-
-  for(i=0; i<10; i++){
-    snprintf(buffer, BUFFER_SIZE, "tport:%dd%se", vars.tcp_port, folder);
-    nbyte = sendto(vars.sock_udp, buffer, strlen(buffer), 0,
-                    (struct sockaddr*)&vars.bcast_addr, vars.bcast_addrlen);
-    if(nbyte == -1){
-      perror("sendto");
+  switch((child_pid = fork())){
+    case -1:
+      perror("fork");
       exit(EXIT_FAILURE);
-    }
 
-    sleep(1);
+    case 0: /* child process */
+      vars.storage = createfsinfo(folder);
+      start_broadcast(&vars);
+      exit(EXIT_SUCCESS);
+
+    default: /* parent process */
+      printf("Press any key when you want the child to stop broadcasting.\n");
+      getchar();
+      kill(child_pid, SIGTERM);
+      wait(0);
+      printf("Child stopped.\n");
+      break;
   }
-
-  printf("done.\n");
 
   return 0;
 }

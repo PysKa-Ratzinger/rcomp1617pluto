@@ -24,6 +24,8 @@ struct file_storage* createfsinfo(char* folder_name){
     return NULL;
   }
 
+  strcpy(res->f_folder, folder_name);
+
   updatefs(res);
   return res;
 }
@@ -38,21 +40,21 @@ int updatefs(struct file_storage* storage){
 
   strcpy(folder, storage->f_folder);
   len = strlen(folder);
-  folder[len] = '/';
-  len++;
-  folder[len] = '\0';
-  file = folder + len;
+  file = folder + len + 1;
 
   offset = 0;
   curr = next = NULL;
-  sprintf(buffer, "ls -p %s | grep -v /", storage->f_folder);
+  sprintf(buffer, "ls -1 %s", storage->f_folder);
   fd = psystem(buffer);
 
-  while(1){
-    nbyte = pread(fd, file, 1, offset);
-    if(nbyte == -1) break;
+  folder[len] = '/';
+  while((nbyte = read(fd, file + offset, 1)) > 0){
+    if(nbyte == -1){
+      perror("read");
+      break;
+    }
 
-    if(file[offset] != '\n'){
+    if(file[offset] == '\n'){
       file[offset] = 0;
 
       if(!(stat(folder, &sb) == 0 && S_ISREG(sb.st_mode))){
@@ -76,7 +78,7 @@ int updatefs(struct file_storage* storage){
         return -1;
       }
 
-      strcpy(next->f_name, buffer);
+      strcpy(next->f_name, file);
       if(curr == NULL)
         storage->f_headfile = next;
       else
@@ -87,6 +89,8 @@ int updatefs(struct file_storage* storage){
       offset++;
     }
   }
+
+  close(fd);
 
   return 0;
 }
@@ -110,7 +114,21 @@ int cleanfs(struct file_storage* storage){
 }
 
 void freefsinfo(struct file_storage* storage){
+  if(storage == NULL) return;
   cleanfs(storage);
-  free(storage->f_folder);
+  if(storage->f_folder != NULL)
+    free(storage->f_folder);
   free(storage);
+}
+
+void printfsinfo(struct file_storage* storage){
+  struct file_info *curr;
+  curr = storage->f_headfile;
+
+  printf("Listing all files detected:\n");
+  while(curr != NULL){
+    printf("\t%s\n", curr->f_name);
+    curr = curr->f_next;
+  }
+  printf("\n");
 }

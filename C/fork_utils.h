@@ -1,5 +1,15 @@
 #pragma once
 
+/*******************************************************************
+ *
+ * FORK_UTILS.H -- Process forking auxiliary library
+ *
+ * Author: Ricardo Catalao
+ *
+ * Purpose: Provide auxiliary methods for handling methods that
+ *            require the need for child processes to be created
+ */
+
 /**
  *   Creates 'num' child processes and returns 0 for the parent
  * process or 1,2,...,num for each of the childs created.

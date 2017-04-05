@@ -1,4 +1,13 @@
 #pragma once
+/*******************************************************************
+ *
+ * FILE_STORAGE.H -- File information storage library
+ *
+ * Author: Ricardo Catalao
+ *
+ * Purpose: Provide auxiliary methods for file information
+ *            handling
+ */
 
 /**
  *    file_storage structure
@@ -69,3 +78,8 @@ int cleanfs(struct file_storage* storage);
  *  as an argument.
  */
 void freefsinfo(struct file_storage* storage);
+
+/**
+ *    Prints every file in storage to stdout
+ */
+void printfsinfo(struct file_storage* storage);
