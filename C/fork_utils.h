@@ -1,9 +1,5 @@
 #pragma once
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 /**
  *   Creates 'num' child processes and returns 0 for the parent
  * process or 1,2,...,num for each of the childs created.

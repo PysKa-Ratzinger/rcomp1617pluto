@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdlib.h>
-
 /**
  *    file_storage structure
  *  Used to save the name of the folder where the files are and also to store

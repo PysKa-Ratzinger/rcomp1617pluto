@@ -1,10 +1,18 @@
 #include "init.h"
 
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <string.h>
+#include <unistd.h>
+
 void init(struct main_var *vars){
   struct addrinfo hints, *list;
   int err;
-
-  // BROADCAST ADDRESS
 
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = AF_INET;      // Only IPv4 allows broadcast
@@ -32,8 +40,6 @@ void init(struct main_var *vars){
 int init_stage1(struct main_var *vars){
   struct addrinfo hints, *list, *rq;
   int err, sock, opt;
-
-  // BROADCAST LISTENING SOCKET
 
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = AF_INET;      // Only IPv4 allows broadcast
@@ -87,12 +93,8 @@ int init_stage1(struct main_var *vars){
 }
 
 int init_stage2(struct main_var *vars){
-  struct sockaddr_in sin;
   struct addrinfo hints, *list, *rq;
-  socklen_t len;
-  int err, sock, opt;
-
-  // TCP FILE TRANSFER SOCKET
+  int err, sock;
 
   memset(&hints, 0, sizeof(struct addrinfo));
   hints.ai_family = AF_INET;        // Since UDP only works on IPv4...
@@ -124,29 +126,37 @@ int init_stage2(struct main_var *vars){
 
   freeaddrinfo(list);
 
-  for(;;){
-    opt = 1;
-    err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-    if(err == -1){ perror("setsockopt"); break; }
+  vars->sock_ft = sock;
 
-    err = listen(sock, MAX_TCP_CONN);
-    if(err == -1) { perror("listen"); break; }
-
-    len = sizeof(sin);
-    err = getsockname(sock, (struct sockaddr*)&sin, &len);
-    if(err == -1) { perror("getsockname"); break; }
-
-    vars->tcp_port = ntohs(sin.sin_port);
-
-    break;  // Infinite loop runs only once
-  }
+  err = init_stage3(vars);
 
   if(err == -1){
-    close(sock);
+    close(vars->sock_ft);
     return -1;
   }
 
-  vars->sock_ft = sock;
+  return 0;
+}
+
+int init_stage3(struct main_var *vars){
+  struct sockaddr_in sin;
+  socklen_t len;
+  int err, opt, sock;
+
+  opt = 1;
+  sock = vars->sock_ft;
+
+  err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+  if(err == -1){ perror("setsockopt"); return -1; }
+
+  err = listen(sock, MAX_TCP_CONN);
+  if(err == -1) { perror("listen"); return -1; }
+
+  len = sizeof(sin);
+  err = getsockname(sock, (struct sockaddr*)&sin, &len);
+  if(err == -1) { perror("getsockname"); return -1; }
+
+  vars->tcp_port = ntohs(sin.sin_port);
 
   return 0;
 }

@@ -1,5 +1,9 @@
 #include "fork_utils.h"
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 int create_childs(int num){
   int i;
   for(i=0; i<num; i++){
