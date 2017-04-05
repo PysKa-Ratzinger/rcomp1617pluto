@@ -14,9 +14,10 @@
 
 #define BCAST_ADDRESS "255.255.255.255"
 #define APP_PORT "32033"
-#define INTERVAL 30
+#define INTERVAL 1
 #define TIMEOUT  45
 #define MAX_TCP_CONN 50
+#define SEM_SHM_NAME "PLUTO_SEM"
 
 struct main_var{
   struct sockaddr_in bcast_addr;  // broadcast address

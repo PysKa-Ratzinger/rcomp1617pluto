@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
+#include <semaphore.h>
 
 #include "init.h"
 #include "fork_utils.h"
@@ -34,13 +35,13 @@ void cleanup(){
   if(getpid() != child_pid){
     kill(child_pid, SIGTERM);
   }
+  sem_unlink(SEM_SHM_NAME); // Just in case a crash happens
 }
 
 int main(){
   struct stat sb;
-  ssize_t nbyte;
-  int i, err;
-  char buffer[BUFFER_SIZE];
+  int err;
+  sem_t *sem;
   char folder[BUFFER_SIZE];
 
   if(signal(SIGINT, ctrl_c_handler) == SIG_ERR){
@@ -82,7 +83,12 @@ int main(){
     default: /* parent process */
       printf("Press any key when you want the child to stop broadcasting.\n");
       getchar();
-      kill(child_pid, SIGTERM);
+      if((sem = sem_open(SEM_SHM_NAME, 0)) == SEM_FAILED){
+        kill(child_pid, SIGTERM);
+      }else{
+        sem_post(sem);
+        sem_close(sem);
+      }
       wait(0);
       printf("Child stopped.\n");
       break;
