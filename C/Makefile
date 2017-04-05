@@ -1,11 +1,8 @@
 all: main
 
-main: main.o init.o fork_utils.o file_storage.o
-main.o: main.c
-init.o: init.c init.h
-fork_utils.o: fork_utils.c fork_utils.h
-file_storage.o: file_storage.c file_storage.h
+main: main.c init.c init.h
+	gcc -Wall -Wextra -o main main.c init.c
 
 clean:
-	rm -fv *.o main
+	rm -fv main
 
