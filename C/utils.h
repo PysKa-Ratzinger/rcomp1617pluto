@@ -1,4 +1,4 @@
-#pragma once
+#include <stdlib.h>
 
 /*******************************************************************
  *
@@ -15,3 +15,9 @@
  * Returns the number of digits needed to print a short number
  */
 int num_places(unsigned short n);
+
+/**
+ *    Asks the user for a valid folder name until the folder name
+ *  he supplies is, indeed, valid.
+ */
+void read_folder(char* folder, size_t buffer_size);

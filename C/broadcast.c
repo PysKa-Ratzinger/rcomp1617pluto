@@ -4,20 +4,50 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <semaphore.h>
 #include <errno.h>
 #include <time.h>
+#include <signal.h>
+#include <semaphore.h>
 
 #include "utils.h"
 #include "file_storage.h"
 #include "broadcast.h"
 #include "init.h"
 
-void start_broadcast(struct main_var *vars){
+static int child_pid = 0;
+
+void cleanup_broadcast(){
+  if(getpid() != child_pid){
+    kill(child_pid, SIGTERM);
+  }
+  sem_unlink(SEM_SHM_NAME); // Just in case a crash happens
+}
+
+void start_broadcast(struct main_var *vars, char *folder){
   struct timespec abs_timeout;
   size_t data_len;
   sem_t *sem;
   char data[UDP_DATAGRAM_MAX_SIZE];
+
+  if(atexit(cleanup_broadcast) != 0){
+    perror("atexit");
+    exit(EXIT_FAILURE);
+  }
+
+  switch((child_pid = fork())){
+    case -1:
+      perror("fork");
+      exit(EXIT_FAILURE);
+
+    case 0: /* child process */
+      vars->storage = createfsinfo(folder);
+      break;
+
+    default: /* parent process */
+      return;
+  }
 
   sem = sem_open(SEM_SHM_NAME, O_CREAT | O_EXCL, 0644, 0);
   while(1){
@@ -50,9 +80,24 @@ void start_broadcast(struct main_var *vars){
       // sem_post happened somewhere. This means it should stop broadcasting
       sem_close(sem);
       sem_unlink(SEM_SHM_NAME);
-      return; // exit function
+      break;
     }
   }
+
+  exit(EXIT_SUCCESS);
+}
+
+void stop_broadcast(){
+  sem_t *sem;
+
+  if((sem = sem_open(SEM_SHM_NAME, 0)) == SEM_FAILED){
+    kill(child_pid, SIGTERM);
+  }else{
+    sem_post(sem);
+    sem_close(sem);
+  }
+  wait(0);
+  printf("Child stopped.\n");
 }
 
 void construct_udp_data(struct main_var *vars, char* data, size_t* data_len){

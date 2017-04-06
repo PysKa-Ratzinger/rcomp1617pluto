@@ -17,7 +17,12 @@
  *    Initiates broadcasting to the network about what the TCP port is
  *  and also what files are available for download.
  */
-void start_broadcast(struct main_var *vars);
+void start_broadcast(struct main_var *vars, char *folder);
+
+/**
+ *    Stops the udp packet broadcasting
+ */
+void stop_broadcast();
 
 /**
  *    Constructs a UDP datagram according to the program protocol. Since
