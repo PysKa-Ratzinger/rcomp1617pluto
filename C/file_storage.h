@@ -1,4 +1,3 @@
-#pragma once
 /*******************************************************************
  *
  * FILE_STORAGE.H -- File information storage library
@@ -8,6 +7,22 @@
  * Purpose: Provide auxiliary methods for file information
  *            handling
  */
+
+ /**
+  *    file_info structure
+  *  Used to save important information regarding some files
+  *
+  *  Members:
+  *    f_bytes   Number of bytes needed to represent the file name
+  *    f_name    The name of the file
+  *    f_next    Pointer to the next file_info structure or NULL if there
+  *                isn't one
+  */
+ struct file_info{
+   int               f_bytes;  // We need this of UDP broadcasting
+   char*             f_name;
+   struct file_info* f_next;
+ };
 
 /**
  *    file_storage structure
@@ -22,22 +37,6 @@
 struct file_storage{
   char*             f_folder;
   struct file_info* f_headfile; // First file of the linked list
-};
-
-/**
- *    file_info structure
- *  Used to save important information regarding some files
- *
- *  Members:
- *    f_bytes   Number of bytes needed to represent the file name
- *    f_name    The name of the file
- *    f_next    Pointer to the next file_info structure or NULL if there
- *                isn't one
- */
-struct file_info{
-  int               f_bytes;  // We need this of UDP broadcasting
-  char*             f_name;
-  struct file_info* f_next;
 };
 
 /**

@@ -17,11 +17,11 @@ void start_broadcast(struct main_var *vars){
   struct timespec abs_timeout;
   size_t data_len;
   sem_t *sem;
-  int nbyte, s;
   char data[UDP_DATAGRAM_MAX_SIZE];
 
   sem = sem_open(SEM_SHM_NAME, O_CREAT | O_EXCL, 0644, 0);
   while(1){
+    int nbyte, s;
     construct_udp_data(vars, data, &data_len);
     nbyte = sendto(vars->sock_udp, data, data_len, 0,
                     (struct sockaddr*)&vars->bcast_addr, vars->bcast_addrlen);
