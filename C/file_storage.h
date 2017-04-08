@@ -9,6 +9,8 @@
  *            handling
  */
 
+#include "init.h"
+
  /**
   *    file_info structure
   *  Used to save important information regarding some files
@@ -89,3 +91,13 @@ void freefsinfo(struct file_storage* storage);
  *    Prints every file in storage to stdout
  */
 void printfsinfo(struct file_storage* storage);
+
+/**
+ *    Constructs a UDP datagram according to the program protocol. Since
+ *  creating the datagram involves creating a list of all the files that
+ *  are shareable, if the number of files is too large the UDP datagram
+ *  will not be able to support every file. In that case, the file list
+ *  is truncated and an error message is sent to 'stderr'.
+ */
+void construct_udp_data(struct main_var *vars, char* data,
+                        struct file_storage* storage, size_t* data_len);

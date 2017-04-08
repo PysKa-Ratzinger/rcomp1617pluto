@@ -56,7 +56,7 @@ int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
 
   while(1){
     int nbyte, s;
-    construct_udp_data(vars, data, &data_len);
+    construct_udp_data(vars, data, storage, &data_len);
     kill(udp_recv_pid, SIGUSR2);
     nbyte = sendto(vars->sock_udp, data, data_len, 0,
                     (struct sockaddr*)&vars->bcast_addr, vars->bcast_addrlen);
@@ -103,25 +103,4 @@ void stop_broadcast(int pid){
   }
   wait(0);
   printf("Child stopped.\n");
-}
-
-void construct_udp_data(struct main_var *vars, char* data, size_t* data_len){
-  size_t res = 0;
-  struct file_info *curr = storage->f_headfile;
-
-  res += sprintf(data, "PLUTO_v2;tport:%dd", vars->tcp_port);
-  while(curr != NULL){
-    if((res + num_places((unsigned short)curr->f_bytes) + 1
-        + curr->f_bytes + 1) > UDP_DATAGRAM_MAX_SIZE){
-      fprintf(stderr, "Could not broadcast all files. UDP max datagram "
-                      "does not allow it\n");
-      break;
-    }else{
-      res += sprintf(data + res, "%d:%s", curr->f_bytes, curr->f_name);
-    }
-    curr = curr->f_next;
-  }
-  res += sprintf(data + res, "e");
-
-  *data_len = res;
 }

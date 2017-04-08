@@ -89,7 +89,7 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
 
       if(temp.ss_family != AF_INET) continue; // We only want IPv4
 
-      // TODO: Precess the obtained result
+      // TODO: Process the obtained result
       // update_plist((struct sockaddr_in*)&temp, temp_len, NULL, time(NULL));
       inet_ntop(AF_INET, &((struct sockaddr_in*)&temp)->sin_addr,
                 peer_name, INET_ADDRSTRLEN);
@@ -106,25 +106,35 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
 
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
                   struct file_info* head_file, time_t abstime){
+  struct peer_info *curr, *prev;
+  int lastItem = 0;
+
   remove_old_plist();
-  if(pinfo == NULL){
-    pinfo = (struct peer_info*)malloc(sizeof(struct peer_info));
-    memset(pinfo, 0, sizeof(struct peer_info)); // Set all values to 0
-    memcpy(&pinfo->p_addr, np_addr, sizeof(struct sockaddr_in));
-    pinfo->p_addr_len = np_addr_len;
-    pinfo->p_lastupdated = abstime;
-  }else{
-    struct peer_info* curr = pinfo;
-    do{
-      if(memcmp(&curr->p_addr, np_addr, sizeof(struct sockaddr_in)) == 0){
-        memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));
-        curr->p_addr_len = np_addr_len;
-        curr->p_lastupdated = abstime;
+  prev = NULL;
+  curr = pinfo;
+  while(1){
+    if(curr == NULL
+        || memcmp(&curr->p_addr, np_addr, sizeof(struct sockaddr_in)) == 0){
+      if(curr == NULL){
+        curr = (struct peer_info*) malloc(sizeof(struct peer_info));
+        memset(curr, 0, sizeof(struct peer_info)); // Set all values to 0
+        lastItem = 1;
+      }else{
         freeflistinfo(curr->p_headfile);
-        curr->p_headfile = head_file;
-        break;
       }
-    }while(curr->p_next != NULL);
+      memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));
+      curr->p_addr_len = np_addr_len;
+      curr->p_lastupdated = abstime;
+      curr->p_headfile = head_file;
+      break;
+    }
+    prev = curr;
+    curr = curr->p_next;
+  }
+
+  if(lastItem){
+    if(prev != NULL) prev->p_next = curr;
+    else pinfo = curr;
   }
 }
 
@@ -138,13 +148,16 @@ void remove_old_plist(){
     next = curr->p_next;
     if(abstime - curr->p_lastupdated >= TIMEOUT){
       free_peer_info(curr);
-      if(prev == NULL) pinfo = curr;
+      if(prev == NULL) pinfo = curr;  // If curr is the first one
       else prev->p_next = next;
     }else{
       prev = curr;
     }
     curr = next;
   }
+
+  if(prev == NULL)  // If all entries were removed
+    pinfo = NULL;
 }
 
 void free_peer_info(struct peer_info* peer){

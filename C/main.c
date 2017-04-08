@@ -30,7 +30,7 @@ static int udp_recv_pipe = 0;
 void ctrl_c_handler(int signal){
   (void)signal;
   // Will call the atexit functions of each separate process
-  if(broadcast_pid && udp_recv_pid) // If is parent
+  if(broadcast_pid && udp_recv_pid) // If is parent, print message
     printf("Interrupt detected. Cleaning up...\n");
   exit(EXIT_SUCCESS);
 }
