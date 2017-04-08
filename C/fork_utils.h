@@ -1,5 +1,4 @@
 #pragma once
-
 /*******************************************************************
  *
  * FORK_UTILS.H -- Process forking auxiliary library

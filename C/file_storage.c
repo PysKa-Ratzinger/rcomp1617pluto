@@ -96,21 +96,27 @@ int updatefs(struct file_storage* storage){
 }
 
 int cleanfs(struct file_storage* storage){
-  struct file_info *curr, *prev;
-
-  curr = storage->f_headfile;
-  if(curr == NULL)
+  if(storage->f_headfile == NULL)
     return -1;
 
+  freeflistinfo(storage->f_headfile);
+
   storage->f_headfile = NULL;
+  return 0;
+}
+
+void freeflistinfo(struct file_info* flist){
+  struct file_info *curr, *next;
+
+  curr = flist;
+
   do{
-    prev = curr->f_next;
+    next = curr->f_next;
     free(curr->f_name);
     free(curr);
-    curr = prev;
+    curr = next;
   }while(curr != NULL);
 
-  return 0;
 }
 
 void freefsinfo(struct file_storage* storage){

@@ -1,3 +1,4 @@
+#pragma once
 /*******************************************************************
  *
  * FILE_STORAGE.H -- File information storage library
@@ -71,6 +72,12 @@ int updatefs(struct file_storage* storage);
  *  instead.
  */
 int cleanfs(struct file_storage* storage);
+
+/**
+ *    Frees the linked list of file_info structures starting with the one
+ *  passed as an argument.
+ */
+void freeflistinfo(struct file_info* flist);
 
 /**
  *    Frees all the allocated memory used by the file_storage structure passed

@@ -17,7 +17,6 @@
 #define INTERVAL 1
 #define TIMEOUT  45
 #define MAX_TCP_CONN 50
-#define SEM_SHM_NAME "PLUTO_SEM"
 
 struct main_var{
   struct sockaddr_in bcast_addr;  // broadcast address
@@ -25,7 +24,6 @@ struct main_var{
   int sock_udp;                   // UDP socket
   int sock_ft;                    // TCP file transfer
   int tcp_port;                   // TCP port number
-  struct file_storage* storage;   // File information storage
 };
 
 /**
