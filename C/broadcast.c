@@ -47,15 +47,16 @@ int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
     exit(EXIT_FAILURE);
   }
 
-  storage = createfsinfo(folder);
-  if((sem = sem_open(SEM_BCAST_NAME, 0)) == SEM_FAILED
-      || (sem_read = sem_open(SEM_RECV_NAME, 0)) == SEM_FAILED){
-    perror("sem_open");
-    exit(EXIT_FAILURE);
-  }
-
   while(1){
     int nbyte, s;
+
+    storage = createfsinfo(folder);
+    if((sem = sem_open(SEM_BCAST_NAME, 0)) == SEM_FAILED
+        || (sem_read = sem_open(SEM_RECV_NAME, 0)) == SEM_FAILED){
+      perror("sem_open");
+      exit(EXIT_FAILURE);
+    }
+
     construct_udp_data(vars, data, storage, &data_len);
     kill(udp_recv_pid, SIGUSR2);
     nbyte = sendto(vars->sock_udp, data, data_len, 0,

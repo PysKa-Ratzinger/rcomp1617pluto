@@ -21,6 +21,8 @@
 struct main_var{
   struct sockaddr_in bcast_addr;  // broadcast address
   socklen_t bcast_addrlen;        // broadcast address length
+  struct sockaddr_in own_addr;    // own address
+  socklen_t own_addrlen;          // own address length
   int sock_udp;                   // UDP socket
   int sock_ft;                    // TCP file transfer
   int tcp_port;                   // TCP port number
@@ -51,6 +53,10 @@ int init_stage1(struct main_var *vars);
  */
 int init_stage2(struct main_var *vars);
 
-/**   Initializes the TCP port
+/**   Initializes the TCP port variable
  */
 int init_stage3(struct main_var *vars);
+
+/**   Gets own IP address
+ */
+int init_stage4(struct main_var *vars);

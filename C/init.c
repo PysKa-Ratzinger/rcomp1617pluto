@@ -158,5 +158,10 @@ int init_stage3(struct main_var *vars){
 
   vars->tcp_port = ntohs(sin.sin_port);
 
-  return 0;
+  return init_stage4(vars);
+}
+
+int init_stage4(struct main_var *vars){
+  return getsockname(vars->sock_udp, (struct sockaddr*)&vars->own_addr,
+          &vars->own_addrlen);
 }

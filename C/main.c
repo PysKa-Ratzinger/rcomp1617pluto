@@ -63,7 +63,9 @@ int main(){
   init(&vars);
   read_folder(folder, BUFFER_SIZE);
   udp_recv_pid = start_udp_receiver(&vars, &udp_recv_pipe);
+  fprintf(stderr, "Receiver process pid: %d\n", udp_recv_pid);
   broadcast_pid = start_broadcast(&vars, folder, udp_recv_pid);
+  fprintf(stderr, "Broadcaster process pid: %d\n", broadcast_pid);
 
   printf("Press any key when you want the child to stop broadcasting.\n");
   getchar();

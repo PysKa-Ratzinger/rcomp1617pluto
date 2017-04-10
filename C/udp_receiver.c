@@ -40,6 +40,7 @@ void synchronize(int signal){
 int start_udp_receiver(struct main_var* vars, int* file_descriptor){
   int pid, fd[2];
 
+  fprintf(stderr, "Starting udp receiver process.\n");
   if(atexit(cleanup_udp_recv) != 0){
     perror("atexit");
     exit(EXIT_FAILURE);
@@ -80,33 +81,50 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
   while(1){
     struct sockaddr_storage temp;
     socklen_t temp_len;
+    struct file_info *head_file;
     char buffer[UDP_DATAGRAM_MAX_SIZE];
-    int nbytes;
+    int nbytes, port;
 
+    fprintf(stderr, "(%d) Starting receiver...\n", getpid());
     if((nbytes = recvfrom(vars->sock_udp, buffer, UDP_DATAGRAM_MAX_SIZE, 0,
       (struct sockaddr*)&temp, &temp_len)) > 0){
+      int err;
       char peer_name[INET_ADDRSTRLEN];
 
       if(temp.ss_family != AF_INET) continue; // We only want IPv4
 
-      // TODO: Process the obtained result
-      // update_plist((struct sockaddr_in*)&temp, temp_len, NULL, time(NULL));
+      // TODO: Remove this debug line
       inet_ntop(AF_INET, &((struct sockaddr_in*)&temp)->sin_addr,
                 peer_name, INET_ADDRSTRLEN);
-
-      // TODO: Remove this debug line
       fprintf(stderr, "Read: %s from %s\n", buffer, peer_name);
 
-    }else if(nbytes == -1 && errno != EINTR){
+      if(temp_len != vars->own_addrlen ||
+          memcmp(&temp, &vars->own_addr, vars->own_addrlen) != 0){
+        fprintf(stderr, "Read own UDP!!!\n");
+        // continue; // This is our address, so we ignore it
+      }
+
+      err = parse_datagram(buffer, UDP_DATAGRAM_MAX_SIZE, &head_file, &port);
+      if(err != 0) continue;
+      update_plist((struct sockaddr_in*)&temp, temp_len, head_file,
+                    time(NULL), port);
+
+    }else if(nbytes == -1){
+      if(errno != EINTR){
         perror("recvfrom");
         exit(EXIT_FAILURE);
+      }else{
+        fprintf(stderr, "Interrupt detected!\n");
+      }
     }
   }
 }
 
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
-                  struct file_info* head_file, time_t abstime){
+                  struct file_info* head_file, time_t abstime,
+                  int tcp_port){
   struct peer_info *curr, *prev;
+  char peer_name[INET_ADDRSTRLEN];
   int lastItem = 0;
 
   remove_old_plist();
@@ -115,17 +133,22 @@ void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
   while(1){
     if(curr == NULL
         || memcmp(&curr->p_addr, np_addr, sizeof(struct sockaddr_in)) == 0){
+      inet_ntop(AF_INET, &np_addr->sin_addr, peer_name, INET_ADDRSTRLEN);
       if(curr == NULL){
         curr = (struct peer_info*) malloc(sizeof(struct peer_info));
         memset(curr, 0, sizeof(struct peer_info)); // Set all values to 0
         lastItem = 1;
+        fprintf(stderr, "Adding new peer: %s\n", peer_name);
       }else{
         freeflistinfo(curr->p_headfile);
+        fprintf(stderr, "Updating peer: %s\n", peer_name);
       }
+      printflistinfo(head_file);
       memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));
       curr->p_addr_len = np_addr_len;
       curr->p_lastupdated = abstime;
       curr->p_headfile = head_file;
+      curr->p_tcp_port = tcp_port;
       break;
     }
     prev = curr;
@@ -140,6 +163,7 @@ void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
 
 void remove_old_plist(){
   struct peer_info *curr, *prev, *next;
+  char peer_name[INET_ADDRSTRLEN];
   time_t abstime = time(NULL);
 
   prev = NULL;
@@ -147,6 +171,8 @@ void remove_old_plist(){
   while(curr != NULL){
     next = curr->p_next;
     if(abstime - curr->p_lastupdated >= TIMEOUT){
+      inet_ntop(AF_INET, &curr->p_addr.sin_addr, peer_name, INET_ADDRSTRLEN);
+      fprintf(stderr, "Peer %s timed out. Removing from list.\n", peer_name);
       free_peer_info(curr);
       if(prev == NULL) pinfo = curr;  // If curr is the first one
       else prev->p_next = next;

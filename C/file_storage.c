@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <limits.h>
+#include <sys/wait.h>
 
 #include "file_storage.h"
 #include "fork_utils.h"
@@ -96,6 +98,7 @@ int updatefs(struct file_storage* storage){
   }
 
   close(fd);
+  wait(0);
 
   return 0;
 }
@@ -133,8 +136,11 @@ void freefsinfo(struct file_storage* storage){
 }
 
 void printfsinfo(struct file_storage* storage){
-  struct file_info *curr;
-  curr = storage->f_headfile;
+  printflistinfo(storage->f_headfile);
+}
+
+void printflistinfo(struct file_info* head_file){
+  struct file_info *curr = head_file;
 
   printf("Listing all files detected:\n");
   while(curr != NULL){
@@ -143,7 +149,6 @@ void printfsinfo(struct file_storage* storage){
   }
   printf("\n");
 }
-
 
 void construct_udp_data(struct main_var *vars, char* data,
                         struct file_storage* storage, size_t* data_len){
@@ -165,4 +170,213 @@ void construct_udp_data(struct main_var *vars, char* data,
   res += sprintf(data + res, "e");
 
   *data_len = res;
+}
+
+int parse_datagram(char *buffer, size_t buffer_max_size,
+                  struct file_info **head_file, int *port){
+  enum state {HEADER, VERSION, PORT, DICT_START, DICT, DICT_END, ENTRY, END};
+  int i, version, tport, nbyte, err = 0;
+  struct file_info *head, *curr;
+  enum state st = HEADER;
+  char name[UDP_DATAGRAM_MAX_SIZE];
+  char c, *p, *end;
+
+  p = buffer;
+  end = buffer + buffer_max_size;
+  head = curr = NULL;
+
+  while(st != END){
+    switch(st){
+      case HEADER:
+          // Check header
+        if(p + 7 >= end){ err = 1; break;};
+        if(strncmp(p, "PLUTO_v", 7) != 0){
+          fprintf(stderr, "parse_datagram: Datagram application protocol does "
+                          "not have correct header.\n");
+          err = 2;
+          break;
+        }
+        p += 7;
+        st = VERSION;
+        break;
+
+      case VERSION:
+          // Check version
+        if(p == end){ err = 1; break;};
+        c = *p;
+        i = 0;
+        version = 0;
+        while(i < 20 && c >= '0' && c <= '9'){
+          version = version * 10 + c - '0';
+          p++; i++;
+          if(p == end){ err = 1; break;};
+          c = *p;
+        }
+        if(err) break;
+
+        if(i == 0){
+          fprintf(stderr, "parse_datagram: Datagram version does "
+                          "not exist. Skipping...\n");
+          err = 2;
+          break;
+        }else if(i == 20){
+          fprintf(stderr, "parse_datagram: Datagram "
+                          "version has too many digits.\n");
+          err = 2;
+          break;
+        }
+
+        if(version > 2 || version <= 0){
+          fprintf(stderr, "parse_datagram: Datagram application protocol has "
+                          "unknown version at %s. Skipping...\n", p);
+          err = 2;
+          break;
+        }
+        if(*p != ';'){
+          fprintf(stderr, "parse_datagram: Expected ';' after version. "
+                          "Skipping...");
+          err = 2;
+          break;
+        }
+        p++;
+        st = PORT;
+        break;
+
+      case PORT:
+          // Check port header
+        if(p + 6 >= end){ err = 1; break;};
+        if(strncmp(p, "tport:", 6) != 0){
+          fprintf(stderr, "parse_datagram: Datagram application protocol does "
+                          "not have correct header.\n");
+          err = 2;
+          break;
+        }
+        p += 6;
+
+          // Parse port
+        c = *p;
+        i = 0;
+        tport = 0;
+        while(i < 20 && c >= '0' && c <= '9'){
+          tport = tport * 10 + c - '0';
+          p++; i++;
+          if(p == end){ err = 1; break;};
+          c = *p;
+        }
+        if(err) break;
+
+        if(i == 20){
+          fprintf(stderr, "parse_datagram: Datagram port "
+                          "number has too many digits.\n");
+          err = 2;
+          break;
+        }
+
+        if(tport <= 0 || tport > USHRT_MAX){
+          fprintf(stderr, "parse_datagram: Specified TCP port is out of "
+                          "bounds. Skipping...\n");
+          err = 2;
+          break;
+        }
+        st = DICT_START;
+        break;
+
+      case DICT_START:
+        if(p == end){ err = 1; break;};
+        if(*p != 'd'){
+          fprintf(stderr, "parse_datagram: Expected 'd' (Dictionary) after "
+                          "port number. Skipping...\n");
+          err = 2;
+          break;
+        }
+        p++;
+        st = DICT;
+        break;
+
+      case DICT:
+        if(p == end){ err = 1; break;};
+        c = *p;
+        if(c == 'e'){
+          st = DICT_END;
+        }else if(c >= '0' && c <= '9'){
+          st = ENTRY;
+        }else{
+          err = 1;
+        }
+        break;
+
+      case ENTRY:
+          // Parse name size
+        c = *p;
+        i = 0;
+        nbyte = 0;
+        while(i < 20 && c >= '0' && c <= '9'){
+          nbyte = nbyte * 10 + c - '0';
+          p++; i++;
+          if(p == end){ err = 1; break;};
+          c = *p;
+        }
+        if(err) break;
+
+        if(i == 20){
+          fprintf(stderr, "parse_datagram: Name byte size "
+                          "number has too many digits.\n");
+          err = 2;
+          break;
+        }
+
+        if(nbyte <= 0 || nbyte > UDP_DATAGRAM_MAX_SIZE){
+          fprintf(stderr, "parse_datagram: Specified name byte size is out "
+                          "of bounds. Skipping...\n");
+          err = 2;
+          break;
+        }
+
+        if(*p != ':'){
+          fprintf(stderr, "parse_datagram: Expected ':' after name byte "
+                          "size. Skipping...\n");
+          err = 2;
+          break;
+        }
+        p++;
+
+        if(p + nbyte >= end){ err = -1; break; }
+        strncpy(name, p, nbyte);
+        p += nbyte;
+
+        // TODO: Process file name
+        if(curr == NULL){
+          curr = (struct file_info*)malloc(sizeof(struct file_info));
+          head = curr;
+        }else{
+          curr->f_next = (struct file_info*)malloc(sizeof(struct file_info));
+          curr = curr->f_next;
+        }
+        memset(curr, 0, sizeof(struct file_info));
+        curr->f_bytes = nbyte;
+        curr->f_name = (char*)malloc(nbyte+1);
+        strncpy(curr->f_name, name, nbyte);
+        curr->f_name[nbyte] = '\0';
+
+        st = DICT;
+        break;
+
+      case DICT_END:
+        *head_file = head;
+        *port = tport;
+        st = END;
+        break;
+
+      case END: break;  // Do nothing
+    }
+    if(err != 0){
+      if(head) freeflistinfo(head);
+      if(err == 1)
+        fprintf(stderr, "parse_datagram: Buffer too small or message to large. "
+                        "Skippin...\n");
+      return -1;
+    }
+  }
+
+  return 0;
 }

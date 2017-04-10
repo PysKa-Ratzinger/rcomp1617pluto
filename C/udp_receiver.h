@@ -19,6 +19,7 @@
 struct peer_info{
   struct sockaddr_in      p_addr;
   socklen_t               p_addr_len;
+  int                     p_tcp_port;
   struct file_info*       p_headfile;
   time_t                  p_lastupdated;
   struct peer_info*       p_next;
@@ -45,7 +46,8 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor);
  *    Updates the list of connected peers using a red-black
  */
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
-                  struct file_info* head_file, time_t abstime);
+                  struct file_info* head_file, time_t abstime,
+                  int tcp_port);
 
 /**
  *    For every peer_info present in a list of known peer's, the current

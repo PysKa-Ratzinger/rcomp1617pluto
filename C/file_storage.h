@@ -93,6 +93,12 @@ void freefsinfo(struct file_storage* storage);
 void printfsinfo(struct file_storage* storage);
 
 /**
+ *    Prints every file in the list started by the file_info structures
+ *  passed as an argument.
+ */
+void printflistinfo(struct file_info* head_file);
+
+/**
  *    Constructs a UDP datagram according to the program protocol. Since
  *  creating the datagram involves creating a list of all the files that
  *  are shareable, if the number of files is too large the UDP datagram
@@ -101,3 +107,9 @@ void printfsinfo(struct file_storage* storage);
  */
 void construct_udp_data(struct main_var *vars, char* data,
                         struct file_storage* storage, size_t* data_len);
+
+/**
+ *    Parses the information of a UDP datagram.
+ */
+int parse_datagram(char *buffer, size_t buffer_max_size,
+                  struct file_info **head_file, int *port);
