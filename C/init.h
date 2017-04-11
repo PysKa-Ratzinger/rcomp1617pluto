@@ -14,15 +14,13 @@
 
 #define BCAST_ADDRESS "255.255.255.255"
 #define APP_PORT "32033"
-#define INTERVAL 1
-#define TIMEOUT  45
+#define INTERVAL 4
+#define TIMEOUT  6
 #define MAX_TCP_CONN 50
 
 struct main_var{
   struct sockaddr_in bcast_addr;  // broadcast address
   socklen_t bcast_addrlen;        // broadcast address length
-  struct sockaddr_in own_addr;    // own address
-  socklen_t own_addrlen;          // own address length
   int sock_udp;                   // UDP socket
   int sock_ft;                    // TCP file transfer
   int tcp_port;                   // TCP port number
@@ -56,7 +54,3 @@ int init_stage2(struct main_var *vars);
 /**   Initializes the TCP port variable
  */
 int init_stage3(struct main_var *vars);
-
-/**   Gets own IP address
- */
-int init_stage4(struct main_var *vars);

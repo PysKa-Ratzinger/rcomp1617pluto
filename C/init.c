@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
+#include <ifaddrs.h>
 
 void init(struct main_var *vars){
   struct addrinfo hints, *list;
@@ -158,10 +159,5 @@ int init_stage3(struct main_var *vars){
 
   vars->tcp_port = ntohs(sin.sin_port);
 
-  return init_stage4(vars);
-}
-
-int init_stage4(struct main_var *vars){
-  return getsockname(vars->sock_udp, (struct sockaddr*)&vars->own_addr,
-          &vars->own_addrlen);
+  return 0;
 }

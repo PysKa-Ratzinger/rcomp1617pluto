@@ -24,7 +24,6 @@ void cleanup_broadcast(){
   freefsinfo(storage);
   sem_close(sem);
   sem_close(sem_read);
-  sem_unlink(SEM_BCAST_NAME); // Just in case a crash happens
 }
 
 int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
@@ -63,6 +62,7 @@ int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
                     (struct sockaddr*)&vars->bcast_addr, vars->bcast_addrlen);
     sem_getvalue(sem_read, &sem_value);
     if(sem_value == 0) sem_post(sem_read);
+    else fprintf(stderr, "Broadcaster: Semaphore not at starting value...\n");
     if(nbyte == -1){
       perror("sendto");
       exit(EXIT_FAILURE);

@@ -43,6 +43,13 @@ struct peer_info{
 int start_udp_receiver(struct main_var* vars, int* file_descriptor);
 
 /**
+ *    Checks to see if the address stored at 'temp' exists in the linked list
+ *  started with 'ifap' passed as an argument.
+ *    If it exists, 0 is returned, else -1 is returned.
+ */
+int is_own_address(struct sockaddr_storage *temp);
+
+/**
  *    Updates the list of connected peers using a red-black
  */
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,

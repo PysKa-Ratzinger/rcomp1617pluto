@@ -344,7 +344,6 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
         strncpy(name, p, nbyte);
         p += nbyte;
 
-        // TODO: Process file name
         if(curr == NULL){
           curr = (struct file_info*)malloc(sizeof(struct file_info));
           head = curr;

@@ -9,6 +9,7 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <ifaddrs.h>
 
 #include "udp_receiver.h"
 #include "init.h"
@@ -23,7 +24,6 @@ void cleanup_udp_recv(){
   if(pipe_fd) close(pipe_fd);
   free_peer_list_info(pinfo);
   if(sem) sem_close(sem);
-  sem_unlink(SEM_RECV_NAME);
 }
 
 void usr_signal_handler(int signal){
@@ -85,24 +85,15 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
     char buffer[UDP_DATAGRAM_MAX_SIZE];
     int nbytes, port;
 
-    fprintf(stderr, "(%d) Starting receiver...\n", getpid());
     if((nbytes = recvfrom(vars->sock_udp, buffer, UDP_DATAGRAM_MAX_SIZE, 0,
       (struct sockaddr*)&temp, &temp_len)) > 0){
       int err;
-      char peer_name[INET_ADDRSTRLEN];
+      // char peer_name[INET_ADDRSTRLEN];
 
       if(temp.ss_family != AF_INET) continue; // We only want IPv4
 
-      // TODO: Remove this debug line
-      inet_ntop(AF_INET, &((struct sockaddr_in*)&temp)->sin_addr,
-                peer_name, INET_ADDRSTRLEN);
-      fprintf(stderr, "Read: %s from %s\n", buffer, peer_name);
-
-      if(temp_len != vars->own_addrlen ||
-          memcmp(&temp, &vars->own_addr, vars->own_addrlen) != 0){
-        fprintf(stderr, "Read own UDP!!!\n");
-        // continue; // This is our address, so we ignore it
-      }
+      if(is_own_address(&temp) == 0)
+        continue; // This is our address, so we ignore it
 
       err = parse_datagram(buffer, UDP_DATAGRAM_MAX_SIZE, &head_file, &port);
       if(err != 0) continue;
@@ -120,6 +111,32 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
   }
 }
 
+int is_own_address(struct sockaddr_storage *temp){
+  struct ifaddrs *head = NULL;
+  struct ifaddrs *curr = NULL;
+  int err;
+
+  err = getifaddrs(&head);
+
+  if(err != 0)
+    return err;
+
+  curr = head;
+  while(curr){
+    if(curr->ifa_addr->sa_family == AF_INET){
+      if(memcmp(&((struct sockaddr_in*)curr->ifa_addr)->sin_addr,
+                &((struct sockaddr_in*)temp)->sin_addr,
+                sizeof(struct sockaddr_in)) == 0){
+        freeifaddrs(head);
+        return 0;
+      }
+    }
+    curr = curr->ifa_next;
+  }
+  freeifaddrs(head);
+  return -1;
+}
+
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
                   struct file_info* head_file, time_t abstime,
                   int tcp_port){
@@ -135,15 +152,15 @@ void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
         || memcmp(&curr->p_addr, np_addr, sizeof(struct sockaddr_in)) == 0){
       inet_ntop(AF_INET, &np_addr->sin_addr, peer_name, INET_ADDRSTRLEN);
       if(curr == NULL){
+        fprintf(stderr, "Adding new peer: %s\n", peer_name);
         curr = (struct peer_info*) malloc(sizeof(struct peer_info));
         memset(curr, 0, sizeof(struct peer_info)); // Set all values to 0
         lastItem = 1;
-        fprintf(stderr, "Adding new peer: %s\n", peer_name);
       }else{
-        freeflistinfo(curr->p_headfile);
-        fprintf(stderr, "Updating peer: %s\n", peer_name);
+        if(curr->p_headfile)  // Shared folder may be empty
+          freeflistinfo(curr->p_headfile);
       }
-      printflistinfo(head_file);
+
       memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));
       curr->p_addr_len = np_addr_len;
       curr->p_lastupdated = abstime;
