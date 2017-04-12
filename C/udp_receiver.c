@@ -15,26 +15,55 @@
 #include "init.h"
 #include "broadcast.h"
 #include "udp_receiver.h"
+#include "p2p_cli.h"
+
+#define BUFFER_SIZE 512
 
 static int pipe_fd = 0;
 static struct peer_info* pinfo = NULL;
-static sem_t* sem = NULL;
+static sem_t* udp_sem = NULL;
+static sem_t* op_sem = NULL;
 
 void cleanup_udp_recv(){
   if(pipe_fd) close(pipe_fd);
   free_peer_list_info(pinfo);
-  if(sem) sem_close(sem);
+  if(udp_sem) sem_close(udp_sem);
+  if(op_sem) sem_close(op_sem);
 }
 
 void usr_signal_handler(int signal){
   (void)signal;
+  char buffer[BUFFER_SIZE];
+  ssize_t nbyte;
 
   // TODO: Read parent command and execute it
+  nbyte = read(pipe_fd, buffer, BUFFER_SIZE);
+  if(nbyte == -1){
+    perror("read");
+    fprintf(stderr, "UDP RECEIVER STOPPED WORKING!!!!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  if(strcmp(buffer, "list") == 0){
+    remove_old_plist();
+    struct peer_info *curr = pinfo;
+    printf("Listing all connected peers:\n");
+    while(curr){
+      inet_ntop(AF_INET, &curr->p_addr.sin_addr, buffer, INET_ADDRSTRLEN);
+      printf("\t - %s\n", buffer);
+      curr = curr->p_next;
+    }
+    printf("\n");
+  }else{
+    fprintf(stderr, "Got unknown command: \"%s\". Exiting...\n", buffer);
+  }
+
+  sem_post(op_sem); // Signal it is done
 }
 
 void synchronize(int signal){
   (void)signal;
-  sem_wait(sem);  // Wait for the go signal
+  sem_wait(udp_sem);  // Wait for the go signal
 }
 
 int start_udp_receiver(struct main_var* vars, int* file_descriptor){
@@ -73,7 +102,8 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
       return pid;
   }
 
-  if((sem = sem_open(SEM_RECV_NAME, 0)) == SEM_FAILED){
+  if((udp_sem = sem_open(SEM_RECV_NAME, 0)) == SEM_FAILED
+      || (op_sem = sem_open(SEM_OP_NAME, 0)) == SEM_FAILED){
     perror("sem_open");
     exit(EXIT_FAILURE);
   }
@@ -88,7 +118,6 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
     if((nbytes = recvfrom(vars->sock_udp, buffer, UDP_DATAGRAM_MAX_SIZE, 0,
       (struct sockaddr*)&temp, &temp_len)) > 0){
       int err;
-      // char peer_name[INET_ADDRSTRLEN];
 
       if(temp.ss_family != AF_INET) continue; // We only want IPv4
 
@@ -159,6 +188,7 @@ void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
       }else{
         if(curr->p_headfile)  // Shared folder may be empty
           freeflistinfo(curr->p_headfile);
+        curr->p_headfile = NULL;
       }
 
       memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));

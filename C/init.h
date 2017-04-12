@@ -26,6 +26,13 @@ struct main_var{
   int tcp_port;                   // TCP port number
 };
 
+struct control_st{
+  int parent_pid;     // Parent process (the one that controls)
+  int broadcast_pid;  // Broadcast process pid
+  int udp_recv_pid;   // UDP Receiver process pid
+  int udp_recv_pipe;  // UDP Receiver process pipe file descriptor
+};
+
 /**
  *    First of a series of init functions. Each calls the next one in the hopes
  *  that the next step initialization is successful. If an error occurs in any
