@@ -44,16 +44,48 @@ void usr_signal_handler(int signal){
     exit(EXIT_FAILURE);
   }
 
-  if(strcmp(buffer, "list") == 0){
-    remove_old_plist();
-    struct peer_info *curr = pinfo;
-    printf("Listing all connected peers:\n");
-    while(curr){
-      inet_ntop(AF_INET, &curr->p_addr.sin_addr, buffer, INET_ADDRSTRLEN);
-      printf("\t - %s\n", buffer);
-      curr = curr->p_next;
+  remove_old_plist();
+
+  if(strncmp(buffer, "list", 4) == 0){
+    if(buffer[4] == '\0'){
+      struct peer_info *curr = pinfo;
+      if(curr == NULL){
+        printf("No peers connected.\n");
+      }else{
+        printf("Listing all connected peers:\n");
+        while(curr){
+          inet_ntop(AF_INET, &curr->p_addr.sin_addr, buffer, INET_ADDRSTRLEN);
+          printf("\t - %s\n", buffer);
+          curr = curr->p_next;
+        }
+        printf("\n");
+      }
+    }else if(nbyte == 5 + sizeof(in_addr_t) + 1){
+      struct peer_info *curr = pinfo;
+      in_addr_t addr;
+
+      memcpy(&addr, buffer+5, sizeof(in_addr_t));
+      while(curr){
+        if(memcmp(&curr->p_addr.sin_addr.s_addr, &addr,
+                  sizeof(in_addr_t)) == 0){
+          struct file_info *file_curr = curr->p_headfile;
+
+          inet_ntop(AF_INET, &curr->p_addr.sin_addr, buffer, BUFFER_SIZE);
+          printf("Listing all files from %s:\n", buffer);
+          while(file_curr){
+            printf("\t%s\n", file_curr->f_name);
+            file_curr = file_curr->f_next;
+          }
+          printf("\n");
+          break;
+        }
+        curr = curr->p_next;
+      }
+      if(curr == NULL){
+        printf("The specified peer either is not connected to the network\n"
+              "or it's not broadcasting it's presence. Cannot list files.\n");
+      }
     }
-    printf("\n");
   }else{
     fprintf(stderr, "Got unknown command: \"%s\". Exiting...\n", buffer);
   }
