@@ -75,9 +75,38 @@ void start_cli(struct control_st *ctrl){
       kill(ctrl->udp_recv_pid, SIGUSR1);
       sem_wait(sem);  // Wait for process to be over
     }else if(strncmp(buffer, "get ", 4) == 0){
-      err = inet_pton(AF_INET, buffer+5, &bf_addr);
-      if(err != 1){
-        // TODO: get IP FILE LOCATION
+      err = inet_pton(AF_INET, buffer+4, &bf_addr);
+      if(err == 1){
+        write(ctrl->udp_recv_pipe, "list ", 5);
+        write(ctrl->udp_recv_pipe, &bf_addr.s_addr, sizeof(in_addr_t));
+        write(ctrl->udp_recv_pipe, "\0", 1);
+        kill(ctrl->udp_recv_pid, SIGUSR1);
+        sem_wait(sem);  // Wait for process to be over
+
+        printf("What file do you want to download?\n>");
+        fgets(buffer, BUFFER_SIZE, stdin);
+
+        p = buffer;
+        end = buffer + BUFFER_SIZE;
+
+        while(p != end){
+          if(*p == '\n'){
+            *p = '\0';
+            break;
+          }
+          p++;
+        }
+
+
+        write(ctrl->udp_recv_pipe, "get ", 4);
+        write(ctrl->udp_recv_pipe, &bf_addr.s_addr, sizeof(in_addr_t));
+        write(ctrl->udp_recv_pipe, "\0", 1);
+        kill(ctrl->udp_recv_pid, SIGUSR1);
+        sem_wait(sem);  // Wait for process to be over
+      }else if(err == 0){
+        fprintf(stderr, "Invalid IPv4 address passed as an argument.\n");
+      }else{
+        fprintf(stderr, "Unspecified error occurred.\n");
       }
     }
     printf(">");

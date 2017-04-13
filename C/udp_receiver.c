@@ -158,6 +158,7 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
 
       err = parse_datagram(buffer, UDP_DATAGRAM_MAX_SIZE, &head_file, &port);
       if(err != 0) continue;
+      remove_old_plist();
       update_plist((struct sockaddr_in*)&temp, temp_len, head_file,
                     time(NULL), port);
 
