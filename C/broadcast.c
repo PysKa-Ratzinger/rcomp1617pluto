@@ -96,11 +96,11 @@ int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
 void stop_broadcast(int pid){
   sem_t *sem;
 
-  if((sem = sem_open(SEM_BCAST_NAME, 0)) == SEM_FAILED){
-    kill(pid, SIGTERM);
-  }else{
+  if((sem = sem_open(SEM_BCAST_NAME, 0)) != SEM_FAILED){
     sem_post(sem);
     sem_close(sem);
+  }else{
+    kill(pid, SIGTERM);
   }
   wait(0);
   printf("Child stopped.\n");

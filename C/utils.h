@@ -22,3 +22,19 @@ int num_places(unsigned short n);
  *  he supplies is, indeed, valid.
  */
 void read_folder(char* folder, size_t buffer_size);
+
+/**
+ *    Checks if the string passed as an argument has a '\n' before the
+ *  null terminator. If it has, the '\n' is replaced with a null terminator,
+ *  making the string 1 byte shorter. The new size of the string is
+ *  returned.
+ */
+size_t remove_newline(char* string);
+
+/**
+ *    Checks if the string passed as an argument has a '\n' before the
+ *  null terminator. If it has, the '\n' is replaced with a null terminator,
+ *  making the string 1 byte shorter. The new size of the string is
+ *  returned.
+ */
+size_t remove_n_newline(char* string, size_t string_size);

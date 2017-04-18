@@ -29,3 +29,17 @@ void read_folder(char* folder, size_t buffer_size){
             "Has to be a full path.\n>");
   }
 }
+
+size_t remove_newline(char* string){
+  return remove_n_newline(string, strlen(string));
+}
+
+size_t remove_n_newline(char* string, size_t string_size){
+  if(string_size == 0) return 0;
+  char *p = string + string_size - 1;
+  if(*p == '\n'){
+    *p = '\0';
+    return string_size - 1;
+  }
+  return string_size;
+}

@@ -60,6 +60,7 @@ void usr_signal_handler(int signal){
         }
         printf("\n");
       }
+
     }else if(nbyte == 5 + sizeof(in_addr_t) + 1){
       struct peer_info *curr = pinfo;
       in_addr_t addr;
@@ -86,6 +87,7 @@ void usr_signal_handler(int signal){
               "or it's not broadcasting it's presence. Cannot list files.\n");
       }
     }
+
   }else{
     fprintf(stderr, "Got unknown command: \"%s\". Exiting...\n", buffer);
   }

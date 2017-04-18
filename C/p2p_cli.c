@@ -9,6 +9,7 @@
 #include "init.h"
 #include "p2p_cli.h"
 #include "broadcast.h"
+#include "utils.h"
 
 #define BUFFER_SIZE 512
 
@@ -37,19 +38,10 @@ void start_cli(struct control_st *ctrl){
   while(fgets(buffer, BUFFER_SIZE, stdin)){
     struct in_addr bf_addr;
 
-    char *p = buffer;
-    char *end = buffer + BUFFER_SIZE;
-
-    while(p != end){
-      if(*p == '\n'){
-        *p = 0;
-        break;
-      }
-      p++;
-    }
-
+    remove_newline(buffer);
     if(strcmp(buffer, "stop") == 0){
       return;
+
     }else if(strcmp(buffer, "help") == 0){
       printf("List of commands:\n");
       printf("\tstop - stops the program completely\n");
@@ -58,6 +50,7 @@ void start_cli(struct control_st *ctrl){
       printf("\t          shared by said peer\n");
       printf("\tget IP - lists all files broadcasted by the peer and asks\n");
       printf("\t          you the name of the file you want\n");
+
     }else if(strncmp(buffer, "list", 4) == 0){
       write(ctrl->udp_recv_pipe, "list", 4);
       if(buffer[4] != '\0'){
@@ -74,9 +67,13 @@ void start_cli(struct control_st *ctrl){
       write(ctrl->udp_recv_pipe, "\0", 1);
       kill(ctrl->udp_recv_pid, SIGUSR1);
       sem_wait(sem);  // Wait for process to be over
+
     }else if(strncmp(buffer, "get ", 4) == 0){
       err = inet_pton(AF_INET, buffer+4, &bf_addr);
       if(err == 1){
+        char file[BUFFER_SIZE];
+        char location[BUFFER_SIZE];
+
         write(ctrl->udp_recv_pipe, "list ", 5);
         write(ctrl->udp_recv_pipe, &bf_addr.s_addr, sizeof(in_addr_t));
         write(ctrl->udp_recv_pipe, "\0", 1);
@@ -84,19 +81,13 @@ void start_cli(struct control_st *ctrl){
         sem_wait(sem);  // Wait for process to be over
 
         printf("What file do you want to download?\n>");
-        fgets(buffer, BUFFER_SIZE, stdin);
+        fgets(file, BUFFER_SIZE, stdin);
+        remove_newline(file);
 
-        p = buffer;
-        end = buffer + BUFFER_SIZE;
-
-        while(p != end){
-          if(*p == '\n'){
-            *p = '\0';
-            break;
-          }
-          p++;
-        }
-
+        printf("Where do you want to save the file? (please insert "
+              "full path)\n>");
+        fgets(location, BUFFER_SIZE, stdin);
+        remove_newline(location);
 
         write(ctrl->udp_recv_pipe, "get ", 4);
         write(ctrl->udp_recv_pipe, &bf_addr.s_addr, sizeof(in_addr_t));
