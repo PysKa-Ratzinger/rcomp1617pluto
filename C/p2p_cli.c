@@ -99,6 +99,8 @@ void start_cli(struct control_st *ctrl){
       }else{
         fprintf(stderr, "Unspecified error occurred.\n");
       }
+    }else{
+        fprintf(stderr, "Type 'help' for a list of commands\n");
     }
     printf(">");
     fflush(stdout);
