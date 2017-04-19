@@ -25,10 +25,11 @@ struct main_var{
 };
 
 struct control_st{
-  int parent_pid;     // Parent process (the one that controls)
-  int broadcast_pid;  // Broadcast process pid
-  int udp_recv_pid;   // UDP Receiver process pid
-  int udp_recv_pipe;  // UDP Receiver process pipe file descriptor
+  int parent_pid;         // Parent process (the one that controls)
+  int broadcast_pid;      // Broadcast process pid
+  int udp_recv_pid;       // UDP Receiver process pid
+  int udp_recv_pipe_in;   // UDP Receiver request pipe
+  int udp_recv_pipe_out;  // UDP Receiver response pipe
 };
 
 /**

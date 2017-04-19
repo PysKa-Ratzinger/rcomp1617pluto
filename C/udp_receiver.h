@@ -40,7 +40,7 @@ struct peer_info{
  *  RETURN:
  *    The pid of the process created shall be returned.
  */
-int start_udp_receiver(int* file_descriptor);
+int start_udp_receiver(int* fd_in, int* fd_out);
 
 /**
  *    Checks to see if the address stored at 'temp' exists in the linked list

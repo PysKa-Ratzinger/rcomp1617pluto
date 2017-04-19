@@ -38,7 +38,8 @@ void ctrl_c_handler(int signal){
 void cleanup(){
   if(ctrl.broadcast_pid) kill(ctrl.broadcast_pid, SIGTERM);
   if(ctrl.udp_recv_pid) kill(ctrl.udp_recv_pid, SIGTERM);
-  if(ctrl.udp_recv_pipe) close(ctrl.udp_recv_pipe);
+  if(ctrl.udp_recv_pipe_in) close(ctrl.udp_recv_pipe_in);
+  if(ctrl.udp_recv_pipe_out) close(ctrl.udp_recv_pipe_out);
   sem_unlink(SEM_BCAST_NAME);
   sem_unlink(SEM_RECV_NAME);
   sem_unlink(SEM_OP_NAME);
@@ -68,7 +69,8 @@ int main(){
   init_tcp(&sock_tcp);
   init_tcp_port_number(sock_tcp, &vars.tcp_port);
   read_folder(folder, BUFFER_SIZE);
-  ctrl.udp_recv_pid = start_udp_receiver(&ctrl.udp_recv_pipe);
+  ctrl.udp_recv_pid = start_udp_receiver(&ctrl.udp_recv_pipe_in,
+                                          &ctrl.udp_recv_pipe_out);
   fprintf(stderr, "Receiver process pid: %d\n", ctrl.udp_recv_pid);
   ctrl.broadcast_pid = start_broadcast(&vars, folder);
   fprintf(stderr, "Broadcaster process pid: %d\n", ctrl.broadcast_pid);

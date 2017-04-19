@@ -19,13 +19,14 @@
 
 #define BUFFER_SIZE 512
 
-static int pipe_fd = 0, sock_udp_recv;
+static int pipe_in = 0, pipe_out = 0, sock_udp_recv;
 static struct peer_info* pinfo = NULL;
 static sem_t* udp_sem = NULL;
 static sem_t* op_sem = NULL;
 
 void cleanup_udp_recv(){
-  if(pipe_fd) close(pipe_fd);
+  if(pipe_in) close(pipe_in);
+  if(pipe_out) close(pipe_out);
   free_peer_list_info(pinfo);
   if(udp_sem) sem_close(udp_sem);
   if(op_sem) sem_close(op_sem);
@@ -37,7 +38,7 @@ void usr_signal_handler(int signal){
   ssize_t nbyte;
 
   // TODO: Read parent command and execute it
-  nbyte = read(pipe_fd, buffer, BUFFER_SIZE);
+  nbyte = read(pipe_in, buffer, BUFFER_SIZE);
   if(nbyte == -1){
     perror("read");
     fprintf(stderr, "UDP RECEIVER STOPPED WORKING!!!!\n");
@@ -78,13 +79,13 @@ void usr_signal_handler(int signal){
             file_curr = file_curr->f_next;
           }
           printf("\n");
+          write(pipe_out, "1", 1);
           break;
         }
         curr = curr->p_next;
       }
       if(curr == NULL){
-        printf("The specified peer either is not connected to the network\n"
-              "or it's not broadcasting it's presence. Cannot list files.\n");
+        write(pipe_out, "0", 1);
       }
     }
 
@@ -95,8 +96,8 @@ void usr_signal_handler(int signal){
   sem_post(op_sem); // Signal it is done
 }
 
-int start_udp_receiver(int* file_descriptor){
-  int pid, fd[2], err;
+int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){
+  int pid, fd_in[2], fd_out[2], err;
 
   fprintf(stderr, "Starting udp receiver process.\n");
   if(atexit(cleanup_udp_recv) != 0){
@@ -109,7 +110,7 @@ int start_udp_receiver(int* file_descriptor){
     exit(EXIT_FAILURE);
   }
 
-  if(pipe(fd) == -1){
+  if(pipe(fd_in) == -1 || pipe(fd_out) == -1){
     perror("pipe");
     exit(EXIT_FAILURE);
   }
@@ -120,13 +121,17 @@ int start_udp_receiver(int* file_descriptor){
       exit(EXIT_FAILURE);
 
     case 0: /* child process */
-      close(fd[1]); // Don't need to write to pipe
-      pipe_fd = fd[0];
+      close(fd_in[1]); // Don't need to write to pipe
+      pipe_in = fd_in[0];
+      close(fd_out[0]); // Don't need to read from pipe
+      pipe_out = fd_out[1];
       break;
 
     default: /* parent process */
-      close(fd[0]); // Don't need to read from pipe
-      *file_descriptor = fd[1];
+      close(fd_in[0]); // Don't need to read from pipe
+      *parent_fd_out = fd_in[1];
+      close(fd_out[1]); // Don't need to write to pipe
+      *parent_fd_in = fd_out[0];
       return pid;
   }
 
