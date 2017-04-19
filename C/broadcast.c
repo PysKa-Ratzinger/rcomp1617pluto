@@ -18,18 +18,18 @@
 #include "udp_receiver.h"
 
 static struct file_storage* storage;
-static sem_t *sem, *sem_read;
+static sem_t *sem;
+static int sock_udp_send;
 
 void cleanup_broadcast(){
   freefsinfo(storage);
   sem_close(sem);
-  sem_close(sem_read);
 }
 
-int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
+int start_broadcast(struct main_var *vars, char *folder){
   struct timespec abs_timeout;
   size_t data_len;
-  int pid, sem_value;
+  int pid, err;
   char data[UDP_DATAGRAM_MAX_SIZE];
 
   switch((pid = fork())){
@@ -46,9 +46,14 @@ int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
     exit(EXIT_FAILURE);
   }
 
-  if((sem = sem_open(SEM_BCAST_NAME, 0)) == SEM_FAILED
-      || (sem_read = sem_open(SEM_RECV_NAME, 0)) == SEM_FAILED){
+  if((sem = sem_open(SEM_BCAST_NAME, 0)) == SEM_FAILED){
     perror("sem_open");
+    exit(EXIT_FAILURE);
+  }
+
+  err = init_udp_broadcast(&sock_udp_send);
+  if(err == -1){
+    fprintf(stderr, "broadcast: Could not create udp socket\n");
     exit(EXIT_FAILURE);
   }
 
@@ -57,12 +62,8 @@ int start_broadcast(struct main_var *vars, char *folder, int udp_recv_pid){
 
     storage = createfsinfo(folder);
     construct_udp_data(vars, data, storage, &data_len);
-    kill(udp_recv_pid, SIGUSR2);
-    nbyte = sendto(vars->sock_udp, data, data_len, 0,
+    nbyte = sendto(sock_udp_send, data, data_len, 0,
                     (struct sockaddr*)&vars->bcast_addr, vars->bcast_addrlen);
-    sem_getvalue(sem_read, &sem_value);
-    if(sem_value == 0) sem_post(sem_read);
-    else fprintf(stderr, "Broadcaster: Semaphore not at starting value...\n");
     if(nbyte == -1){
       perror("sendto");
       exit(EXIT_FAILURE);

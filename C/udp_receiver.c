@@ -19,7 +19,7 @@
 
 #define BUFFER_SIZE 512
 
-static int pipe_fd = 0;
+static int pipe_fd = 0, sock_udp_recv;
 static struct peer_info* pinfo = NULL;
 static sem_t* udp_sem = NULL;
 static sem_t* op_sem = NULL;
@@ -95,13 +95,8 @@ void usr_signal_handler(int signal){
   sem_post(op_sem); // Signal it is done
 }
 
-void synchronize(int signal){
-  (void)signal;
-  sem_wait(udp_sem);  // Wait for the go signal
-}
-
-int start_udp_receiver(struct main_var* vars, int* file_descriptor){
-  int pid, fd[2];
+int start_udp_receiver(int* file_descriptor){
+  int pid, fd[2], err;
 
   fprintf(stderr, "Starting udp receiver process.\n");
   if(atexit(cleanup_udp_recv) != 0){
@@ -109,8 +104,7 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
     exit(EXIT_FAILURE);
   }
 
-  if(signal(SIGUSR1, usr_signal_handler) == SIG_ERR
-      || signal(SIGUSR2, synchronize) == SIG_ERR){
+  if(signal(SIGUSR1, usr_signal_handler) == SIG_ERR){
     fprintf(stderr, "Could not set-up user signal handler.\n");
     exit(EXIT_FAILURE);
   }
@@ -142,6 +136,12 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
     exit(EXIT_FAILURE);
   }
 
+  err = init_udp_receive(&sock_udp_recv);
+  if(err == -1){
+    fprintf(stderr, "udp_receiver: Could not create udp socket\n");
+    exit(EXIT_FAILURE);
+  }
+
   while(1){
     struct sockaddr_storage temp;
     socklen_t temp_len;
@@ -149,7 +149,7 @@ int start_udp_receiver(struct main_var* vars, int* file_descriptor){
     char buffer[UDP_DATAGRAM_MAX_SIZE];
     int nbytes, port;
 
-    if((nbytes = recvfrom(vars->sock_udp, buffer, UDP_DATAGRAM_MAX_SIZE, 0,
+    if((nbytes = recvfrom(sock_udp_recv, buffer, UDP_DATAGRAM_MAX_SIZE, 0,
       (struct sockaddr*)&temp, &temp_len)) > 0){
       int err;
 

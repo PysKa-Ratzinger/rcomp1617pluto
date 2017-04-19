@@ -21,8 +21,6 @@
 struct main_var{
   struct sockaddr_in bcast_addr;  // broadcast address
   socklen_t bcast_addrlen;        // broadcast address length
-  int sock_udp;                   // UDP socket
-  int sock_ft;                    // TCP file transfer
   int tcp_port;                   // TCP port number
 };
 
@@ -48,16 +46,20 @@ struct control_st{
  *    This init function initializes the BROADCAST address where the UDP
  *  packets will be periodically sent.
  */
-void init(struct main_var *vars);
+void init_main_vars(struct main_var *vars);
 
-/**   Initializes the UDP socket
+/**   Initializes the UDP socket to be used in broadcast
  */
-int init_stage1(struct main_var *vars);
+int init_udp_broadcast(int *sock_udp);
+
+/**   Initializes the UDP socket to be used for listening broadcasts
+ */
+int init_udp_receive(int *sock_udp);
 
 /**   Initializes the TCP socket
  */
-int init_stage2(struct main_var *vars);
+int init_tcp(int *sock_tcp);
 
 /**   Initializes the TCP port variable
  */
-int init_stage3(struct main_var *vars);
+int init_tcp_port_number(int sock_tcp, int *port);
