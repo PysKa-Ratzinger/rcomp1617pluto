@@ -349,7 +349,7 @@ Before making tranfers with this awesome App,
                     <property name="action_name">Avançar</property>
                     <property name="image_position">right</property>
                     <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="file_set" object="folderButton" swapped="no"/>
+                    <signal name="clicked" handler="folder_set" object="folderButton" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
