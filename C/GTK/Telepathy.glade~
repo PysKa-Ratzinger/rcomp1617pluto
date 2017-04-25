@@ -274,7 +274,7 @@ Welcome to the best Peer2Peer Application,
                     <property name="use_stock">True</property>
                     <property name="image_position">right</property>
                     <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="gtk_widget_showPicker" object="FolderPicker" swapped="no"/>
+                    <signal name="clicked" handler="gtk_widget_show" object="FolderPicker" swapped="no"/>
                     <signal name="clicked" handler="set_Next_Disabled" object="nextButton1" swapped="no"/>
                   </object>
                   <packing>
