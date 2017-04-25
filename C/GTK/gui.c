@@ -20,43 +20,46 @@
 /* Well, by golly, this program uses widgets: */
 typedef struct {
 	GtkWidget *Start;
-	GtkWidget *filePicker;
+	GtkWidget *folderPicker;
 	GtkWidget *nextButton1;
 	GtkWidget *quitButton1;
 	GtkWidget *nextButton2;
 	GtkWidget *quitButton2;
 	GtkWidget *folderButton;
 	GtkWidget *helpButton;
+	GtkWidget *HelpAboutDialog;
 } AppWidgets;
 
 #if 1
 #define UNUSED gpointer _x_ G_GNUC_UNUSED
 #endif
-void set_Next_Visible(GtkWidget *widget, gpointer user_data){
-	gtk_widget_show (widget);
+
+
+void set_Next_Visible(UNUSED, AppWidgets *app){
+	gtk_widget_show (app->nextButton1);
 }
 
-void set_Next_Disabled(GtkWidget *widget, gpointer user_data){
-	gtk_widget_hide(widget);
-}
-
-void gtk_main_quit(){
-	printf("\n\nQUIT PLEASE");
+void close_app(UNUSED, AppWidgets *app){
+	gtk_main_quit();
+	
 }
 
 void gtk_widget_showPicker(UNUSED, AppWidgets *app){
-	gtk_widget_show(app->filePicker);
-	gtk_widget_hide(app->Start);
+	gtk_widget_destroy(app->Start);
+	gtk_widget_show(app->folderPicker);
 }
 
-void file_set(){
-	/*What to do with folder?*/
+void file_set(UNUSED, AppWidgets *app){
+	
+	/***
+	 * WHAT TO DO WITH FOLDER?
+	 * **/
+	
 }
 
 /* Show the About box */
-void help_about(GtkWidget *widget){
-	gtk_dialog_run(GTK_DIALOG(widget));
-	gtk_widget_hide(widget);
+void help_about(UNUSED, AppWidgets *app){
+	gtk_dialog_run(GTK_DIALOG(app->HelpAboutDialog));
 }
 
 
@@ -82,13 +85,14 @@ int main(int argc, char **argv) {
 	#define appGET(xx) \
 	app->xx=GTK_WIDGET(gtk_builder_get_object(builder,#xx))
 	appGET(Start);
-	appGET(filePicker);
+	appGET(folderPicker);
 	appGET(nextButton1);
 	appGET(quitButton1);
 	appGET(nextButton2);
 	appGET(quitButton2);
 	appGET(helpButton);
 	appGET(folderButton);
+	appGET(HelpAboutDialog);
 	gtk_builder_connect_signals(builder, app);
 	g_object_unref(G_OBJECT(builder));
 	window = GTK_WIDGET(app->Start);
