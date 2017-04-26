@@ -44,6 +44,11 @@ int main(int argc, char **argv) {
 	appGET(quitButton1);
 	appGET(nextButton2);
 	appGET(quitButton2);
+	appGET(finishButton);
+	appGET(backButton);
+	appGET(selectNick);
+	appGET(nickBox);
+	appGET(quitButton3);
 	appGET(helpButton);
 	appGET(folderButton);
 	appGET(HelpAboutDialog);

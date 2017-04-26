@@ -14,6 +14,11 @@ typedef struct {
 	GtkWidget *quitButton1;
 	GtkWidget *nextButton2;
 	GtkWidget *quitButton2;
+	GtkWidget *quitButton3;
+	GtkWidget *finishButton;
+	GtkWidget *backButton;
+	GtkWidget *nickBox;
+	GtkWidget *selectNick;
 	GtkWidget *folderButton;
 	GtkWidget *helpButton;
 	GtkWidget *HelpAboutDialog;
