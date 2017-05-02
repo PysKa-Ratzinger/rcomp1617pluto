@@ -100,7 +100,6 @@ void usr_signal_handler(int signal){
 int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){
   int pid, fd_in[2], fd_out[2], err;
 
-  fprintf(stderr, "Starting udp receiver process.\n");
   if(atexit(cleanup_udp_recv) != 0){
     perror("atexit");
     exit(EXIT_FAILURE);

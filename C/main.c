@@ -73,9 +73,11 @@ int main(){
   }
   read_folder(folder, BUFFER_SIZE);
   ctrl.server_pid = start_server(folder, &vars.tcp_port);
+  fprintf(stderr, "Server process pid:      %d - port: %d\n",
+          ctrl.server_pid, vars.tcp_port);
   ctrl.udp_recv_pid = start_udp_receiver(&ctrl.udp_recv_pipe_in,
                                           &ctrl.udp_recv_pipe_out);
-  fprintf(stderr, "Receiver process pid: %d\n", ctrl.udp_recv_pid);
+  fprintf(stderr, "Receiver process pid:    %d\n", ctrl.udp_recv_pid);
   ctrl.broadcast_pid = start_broadcast(&vars, folder);
   fprintf(stderr, "Broadcaster process pid: %d\n", ctrl.broadcast_pid);
 

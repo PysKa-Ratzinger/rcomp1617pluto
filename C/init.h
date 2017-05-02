@@ -20,7 +20,7 @@
 #define UDP_DATAGRAM_MAX_SIZE 65508
 #define INTERVAL 4
 #define TIMEOUT  6
-#define MAX_TCP_CONN 50
+#define MAX_TCP_CONN 5
 
 struct main_var{
   struct sockaddr_in bcast_addr;  // broadcast address
