@@ -88,13 +88,12 @@ Welcome to the best Peer2Peer Application,
                   <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkButton" id="helpButton">
+                  <object class="GtkButton">
                     <property name="label" translatable="yes">About us</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="action_name">avança_help_about</property>
-                    <signal name="clicked" handler="help_about" object="HelpAboutDialog" swapped="no"/>
+                    <signal name="clicked" handler="help_about" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -154,7 +153,7 @@ Welcome to the best Peer2Peer Application,
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>
@@ -190,6 +189,199 @@ Welcome to the best Peer2Peer Application,
           <object class="GtkListBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkWindow">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">39</property>
+            <property name="pixbuf">telepathy.jpg</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">4</property>
+                <property name="label" translatable="yes">Telepathy!</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_bottom">59</property>
+                <property name="label" translatable="yes">v1.0.0.0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_bottom">10</property>
+            <child>
+              <object class="GtkButton" id="about_creditos">
+                <property name="label" translatable="yes">The Team</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">35</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="about_licenca">
+                <property name="label" translatable="yes">License</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="margin_left">35</property>
+                <property name="margin_right">10</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="about_close">
+                <property name="label" translatable="yes">Close</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="margin_left">70</property>
+                <property name="margin_right">10</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkOffscreenWindow">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">22</property>
+            <property name="margin_bottom">20</property>
+            <property name="label" translatable="yes">Team:</property>
+            <attributes>
+              <attribute name="style" value="italic"/>
+              <attribute name="weight" value="bold"/>
+              <attribute name="variant" value="normal"/>
+              <attribute name="stretch" value="expanded"/>
+              <attribute name="underline" value="True"/>
+              <attribute name="foreground" value="#000000000000"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_bottom">56</property>
+            <property name="label" translatable="yes">The team is composed by 5 elements:
+
+	-&gt; 1150623
+	-&gt;
+	-&gt;
+	-&gt;
+	-&gt;
+
+And together we are Team Pluto!! From 2DD Class</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label" translatable="yes">button</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="halign">center</property>
+            <property name="margin_bottom">10</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -264,10 +456,8 @@ Before making tranfers with this awesome App,
                     <property name="action">select-folder</property>
                     <property name="do_overwrite_confirmation">True</property>
                     <property name="title" translatable="yes">Select a Folder</property>
-                    <signal name="file-set" handler="set_Next_Visible" object="nextButton1" after="yes" swapped="no"/>
                     <accessibility>
                       <relation type="controlled-by" target="folderPicker"/>
-                      <relation type="controller-for" target="nextButton1"/>
                     </accessibility>
                     <child internal-child="accessible">
                       <object class="AtkObject" id="folderButton-atkobject">
@@ -348,21 +538,19 @@ Before making tranfers with this awesome App,
                   <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkButton" id="nextButton1">
+                  <object class="GtkButton">
                     <property name="label" translatable="yes">Next</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="margin_left">151</property>
-                    <property name="action_name">Avançar</property>
-                    <property name="image_position">right</property>
-                    <property name="always_show_image">True</property>
-                    <signal name="clicked" handler="folder_set" object="folderButton" swapped="no"/>
+                    <property name="margin_left">170</property>
+                    <property name="margin_right">20</property>
+                    <property name="margin_bottom">8</property>
+                    <signal name="clicked" handler="folder_set" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="padding">77</property>
                     <property name="position">4</property>
                   </packing>
                 </child>
@@ -385,7 +573,7 @@ Before making tranfers with this awesome App,
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>
@@ -429,8 +617,9 @@ Give it to your pc so it's easier for others to know who you are!
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_left">16</property>
                 <property name="margin_top">14</property>
-                <property name="margin_bottom">27</property>
+                <property name="margin_bottom">32</property>
                 <property name="label" translatable="yes"> Nickname: </property>
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
@@ -446,8 +635,10 @@ Give it to your pc so it's easier for others to know who you are!
               <object class="GtkEntry" id="nickBox">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="margin_right">14</property>
                 <property name="margin_top">20</property>
                 <property name="margin_bottom">50</property>
+                <property name="max_length">10</property>
                 <property name="max_width_chars">10</property>
                 <property name="input_purpose">name</property>
                 <property name="input_hints">GTK_INPUT_HINT_UPPERCASE_WORDS | GTK_INPUT_HINT_NONE</property>
@@ -506,7 +697,7 @@ Give it to your pc so it's easier for others to know who you are!
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="show_filePicker_again" swapped="no"/>
+                <signal name="clicked" handler="gtk_widget_showPicker_again" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -527,6 +718,7 @@ Give it to your pc so it's easier for others to know who you are!
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="finish" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -563,7 +755,7 @@ Give it to your pc so it's easier for others to know who you are!
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>
