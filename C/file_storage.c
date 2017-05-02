@@ -12,8 +12,6 @@
 #include "utils.h"
 #include "broadcast.h"
 
-static const int BUFFER_SIZE = 512;
-
 struct file_storage* createfsinfo(char* folder_name){
   struct file_storage *res;
 
@@ -42,7 +40,7 @@ int updatefs(struct file_storage* storage){
   off_t offset;
   ssize_t nbyte;
   struct file_info *curr, *next;
-  char buffer[BUFFER_SIZE], folder[BUFFER_SIZE], *file;
+  char buffer[FILENAME_SIZE], folder[FILENAME_SIZE], *file;
 
   strcpy(folder, storage->f_folder);
   len = strlen(folder);

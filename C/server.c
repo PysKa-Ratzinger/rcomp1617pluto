@@ -4,8 +4,10 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <arpa/inet.h>
 
 #include "server.h"
+#include "file_storage.h"
 #include "init.h"
 
 static char *my_folder;
@@ -17,13 +19,24 @@ void end(int signal){
 
 void handle_request(int fd, struct sockaddr_storage *peer_addr,
                     socklen_t peer_addr_len){
-  // char buffer[4096];
-  // char folder[1024];
-  (void) fd;
-  (void) peer_addr;
-  (void) peer_addr_len;
+  char buffer[FILENAME_SIZE];
+  int index = 0, nbyte;
 
-  // TODO: Finish function
+  if(inet_ntop(AF_INET, peer_addr, buffer, peer_addr_len) == NULL)
+    handle_error("inet_ntop");
+
+  printf("(%d) Got file request from %s\n", getpid(), buffer);
+
+  while(1){
+    nbyte = recv(fd, &buffer[index], 1, 0);
+    if(nbyte == 0){
+      fprintf(stderr, "(%d) Connection with client terminated "
+              "abruptly.\n", getpid());
+      exit(EXIT_FAILURE);
+    }
+    printf("(%d) Received byte '%c'.\n", getpid(), buffer[index]);
+    index += nbyte;
+  }
 }
 
 int start_server(char* folder, int *tcp_port){
@@ -33,15 +46,15 @@ int start_server(char* folder, int *tcp_port){
 
   my_folder = folder;
 
-  int pid;
-  switch((pid = fork())){
+  int pid = fork();
+  switch(pid){
     case -1: /* error */
       handle_error("server:fork");
 
     case 0: /* child behaviour */
       break;
 
-    default: /* parnet behaviour */
+    default: /* parent behaviour */
       close(sock_tcp);
       return pid;
   }
@@ -53,16 +66,21 @@ int start_server(char* folder, int *tcp_port){
     socklen_t peer_addr_len;
     int fd;
 
-    if(tcp_connections == MAX_TCP_CONN){
-      wait(0);
-      tcp_connections--;
-    }
-
     fd = accept(sock_tcp, (struct sockaddr*)&peer_addr, &peer_addr_len);
     if(fd == -1){
       if(errno != EINTR){
         handle_error("accept");
       }else{
+        continue;
+      }
+    }
+
+    if(tcp_connections == MAX_TCP_CONN){
+      if(waitpid((pid_t)-1, 0, WNOHANG) > 0){
+        tcp_connections--;
+      }else{
+        close(fd);
+        printf("Max connections reached. Connection refused.\n");
         continue;
       }
     }

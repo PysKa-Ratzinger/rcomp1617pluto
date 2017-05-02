@@ -11,6 +11,8 @@
 
 #include "init.h"
 
+#define FILENAME_SIZE 512
+
  /**
   *    file_info structure
   *  Used to save important information regarding some files
