@@ -14,8 +14,6 @@
  #include "init.h"
  #include "file_storage.h"
 
- #define SEM_RECV_NAME "PLUTO_RECV_SEM"
-
 struct peer_info{
   struct sockaddr_in      p_addr;
   socklen_t               p_addr_len;

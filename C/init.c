@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <ifaddrs.h>
 
-void init_main_vars(struct main_var *vars){
+int init_main_vars(struct main_var *vars){
   struct addrinfo hints, *list;
   int err;
 
@@ -24,12 +24,13 @@ void init_main_vars(struct main_var *vars){
   if(err != 0){
     fprintf(stderr, "failed to get broadcast address: %s\n",
         gai_strerror(err));
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
   vars->bcast_addrlen = list->ai_addrlen;
   memcpy(&vars->bcast_addr, list->ai_addr, list->ai_addrlen);
   freeaddrinfo(list);
+  return 0;
 }
 
 int init_udp_receive(int *sock_udp){

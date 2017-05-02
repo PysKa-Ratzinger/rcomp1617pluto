@@ -1,0 +1,5 @@
+#pragma once
+
+#define SEM_BCAST_NAME "PLUTO_BCAST_SEM"
+#define SEM_OP_NAME "PLUTO_OP_SEM"
+#define SEM_RECV_NAME "PLUTO_RECV_SEM"

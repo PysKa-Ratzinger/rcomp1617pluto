@@ -10,8 +10,6 @@
  *            interact with the user.
  */
 
- #define SEM_OP_NAME "PLUTO_OP_SEM"
-
 /**
  *    Starts the command line interface
  */

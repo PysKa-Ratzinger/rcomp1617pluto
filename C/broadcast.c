@@ -12,6 +12,7 @@
 #include <semaphore.h>
 
 #include "utils.h"
+#include "synchronize.h"
 #include "file_storage.h"
 #include "broadcast.h"
 #include "init.h"

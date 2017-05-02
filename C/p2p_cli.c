@@ -10,6 +10,7 @@
 #include "p2p_cli.h"
 #include "broadcast.h"
 #include "utils.h"
+#include "synchronize.h"
 
 #define BUFFER_SIZE 512
 

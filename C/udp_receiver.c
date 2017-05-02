@@ -13,6 +13,7 @@
 
 #include "udp_receiver.h"
 #include "init.h"
+#include "synchronize.h"
 #include "broadcast.h"
 #include "udp_receiver.h"
 #include "p2p_cli.h"

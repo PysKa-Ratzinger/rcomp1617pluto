@@ -2,9 +2,6 @@
 
 #include "init.h"
 
-#define UDP_DATAGRAM_MAX_SIZE 65508
-#define SEM_BCAST_NAME "PLUTO_BCAST_SEM"
-
 /*******************************************************************
  *
  * BROADCAST.H -- Broadcast behaviour library

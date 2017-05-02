@@ -15,12 +15,12 @@
 #include <ifaddrs.h>
 
 #include "init.h"
-#include "fork_utils.h"
-#include "file_storage.h"
+#include "synchronize.h"
 #include "broadcast.h"
 #include "utils.h"
 #include "udp_receiver.h"
 #include "p2p_cli.h"
+#include "server.h"
 
 #define BUFFER_SIZE 256
 
@@ -46,29 +46,33 @@ void cleanup(){
 }
 
 int main(){
-  sem_t* sem;
+  sem_t* sem[3];
   char folder[BUFFER_SIZE];
 
   ctrl.parent_pid = getpid();
-  if(signal(SIGINT, ctrl_c_handler) == SIG_ERR){
-    fprintf(stderr, "Could not set-up interrupt handler.\n");
-    exit(EXIT_FAILURE);
+  if(signal(SIGINT, ctrl_c_handler) == SIG_ERR)
+    handle_error("signal");
+
+  if(atexit(cleanup) != 0)
+    handle_error("atexit");
+
+  sem[0] = sem_open(SEM_BCAST_NAME, O_CREAT | O_EXCL, 0644, 0);
+  sem[1] = sem_open(SEM_RECV_NAME, O_CREAT | O_EXCL, 0644, 0);
+  sem[2] = sem_open(SEM_OP_NAME, O_CREAT | O_EXCL, 0644, 0);
+
+  int i;
+  for(i=0; i<3; i++){
+    if(sem[i] == SEM_FAILED)
+      handle_error("sem_open");
+    sem_close(sem[i]);
   }
 
-  if(atexit(cleanup) != 0){
-    perror("atexit");
+  if(init_main_vars(&vars) == -1){
+    printf("[ERROR] Initialization of main variables failed. Quitting...\n");
     exit(EXIT_FAILURE);
   }
-
-  sem = sem_open(SEM_BCAST_NAME, O_CREAT | O_EXCL, 0644, 0); sem_close(sem);
-  sem = sem_open(SEM_RECV_NAME, O_CREAT | O_EXCL, 0644, 0); sem_close(sem);
-  sem = sem_open(SEM_OP_NAME, O_CREAT | O_EXCL, 0644, 0); sem_close(sem);
-
-  init_main_vars(&vars);
-  int sock_tcp;
-  init_tcp(&sock_tcp);
-  init_tcp_port_number(sock_tcp, &vars.tcp_port);
   read_folder(folder, BUFFER_SIZE);
+  ctrl.server_pid = start_server(folder, &vars.tcp_port);
   ctrl.udp_recv_pid = start_udp_receiver(&ctrl.udp_recv_pipe_in,
                                           &ctrl.udp_recv_pipe_out);
   fprintf(stderr, "Receiver process pid: %d\n", ctrl.udp_recv_pid);
