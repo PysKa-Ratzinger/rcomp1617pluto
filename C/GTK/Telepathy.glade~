@@ -24,185 +24,7 @@ along with Pluto - 2DD.  If not, see <http://www.gnu.org/licenses/>.
   <!-- interface-license-type gplv3 -->
   <!-- interface-name Pluto - 2DD -->
   <!-- interface-description Peer2Peer Aplication - Telepathy -->
-  <object class="GtkWindow" id="Start">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Telepathy</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">50</property>
-            <property name="margin_right">50</property>
-            <property name="margin_bottom">2</property>
-            <property name="label" translatable="yes">			Hello There!
-
-Welcome to the best Peer2Peer Application, 
-			
-			 Telepathy!
-</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="padding">48</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">65</property>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <object class="GtkButton" id="quitButton2">
-                    <property name="label" translatable="yes">Quit</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="close_app" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="padding">30</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <object class="GtkButton">
-                    <property name="label" translatable="yes">About us</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="help_about" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="padding">30</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="nextButton2">
-                    <property name="label" translatable="yes">Next</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="gtk_widget_showPicker" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="padding">30</property>
-                    <property name="position">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Pluto - 2DD - 2016-2017</property>
-                <property name="justify">right</property>
-                <attributes>
-                  <attribute name="foreground" value="#88888a8a8585"/>
-                </attributes>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
-  </object>
-  <object class="GtkAboutDialog" id="HelpAboutDialog">
-    <property name="can_focus">False</property>
-    <property name="type">popup</property>
-    <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
-    <property name="transient_for">Start</property>
-    <property name="program_name">Telepathy</property>
-    <property name="version">1.0.0.0</property>
-    <property name="logo">telepathy.jpg</property>
-    <property name="license_type">custom</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="about">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="name">Help_About</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkListBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <child>
-      <placeholder/>
-    </child>
-  </object>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="HelpAboutDialog">
     <property name="can_focus">False</property>
     <child>
       <object class="GtkBox">
@@ -274,6 +96,7 @@ Welcome to the best Peer2Peer Application,
                 <property name="receives_default">True</property>
                 <property name="margin_left">10</property>
                 <property name="margin_right">35</property>
+                <signal name="clicked" handler="show_team" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -282,13 +105,14 @@ Welcome to the best Peer2Peer Application,
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="about_licenca">
+              <object class="GtkButton" id="about_license">
                 <property name="label" translatable="yes">License</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="margin_left">35</property>
                 <property name="margin_right">10</property>
+                <signal name="clicked" handler="show_license" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -304,6 +128,7 @@ Welcome to the best Peer2Peer Application,
                 <property name="receives_default">True</property>
                 <property name="margin_left">70</property>
                 <property name="margin_right">10</property>
+                <signal name="clicked" handler="closeHelpAbout" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -320,68 +145,130 @@ Welcome to the best Peer2Peer Application,
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>
-  <object class="GtkOffscreenWindow">
+  <object class="GtkWindow" id="Start">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Telepathy</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_top">22</property>
-            <property name="margin_bottom">20</property>
-            <property name="label" translatable="yes">Team:</property>
-            <attributes>
-              <attribute name="style" value="italic"/>
-              <attribute name="weight" value="bold"/>
-              <attribute name="variant" value="normal"/>
-              <attribute name="stretch" value="expanded"/>
-              <attribute name="underline" value="True"/>
-              <attribute name="foreground" value="#000000000000"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_bottom">56</property>
-            <property name="label" translatable="yes">The team is composed by 5 elements:
+            <property name="margin_left">50</property>
+            <property name="margin_right">50</property>
+            <property name="margin_bottom">2</property>
+            <property name="label" translatable="yes">			Hello There!
 
-	-&gt; 1150623
-	-&gt;
-	-&gt;
-	-&gt;
-	-&gt;
-
-And together we are Team Pluto!! From 2DD Class</property>
+Welcome to the best Peer2Peer Application, 
+			
+			 Telepathy!
+</property>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
+            <property name="padding">48</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
-            <property name="label" translatable="yes">button</property>
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">center</property>
-            <property name="margin_bottom">10</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">65</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkButton" id="quitButton2">
+                    <property name="label" translatable="yes">Quit</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="close_app" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">30</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkButton" id="helpButton">
+                    <property name="label" translatable="yes">About us</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="help_about" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">30</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="nextButton2">
+                    <property name="label" translatable="yes">Next</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="gtk_widget_showPicker" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">30</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Pluto - 2DD - 2016-2017</property>
+                <property name="justify">right</property>
+                <attributes>
+                  <attribute name="foreground" value="#88888a8a8585"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -391,14 +278,13 @@ And together we are Team Pluto!! From 2DD Class</property>
         </child>
       </object>
     </child>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
   </object>
   <object class="GtkWindow" id="folderPicker">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Telepathy</property>
-    <signal name="activate-default" handler="do_picker_defaults" swapped="no"/>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -524,6 +410,7 @@ Before making tranfers with this awesome App,
                     <property name="receives_default">True</property>
                     <property name="margin_left">59</property>
                     <property name="margin_bottom">8</property>
+                    <signal name="clicked" handler="close_app" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -756,6 +643,210 @@ Give it to your pc so it's easier for others to know who you are!
       </object>
     </child>
     <child type="titlebar">
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkTextBuffer" id="textbuffer1">
+    <property name="text" translatable="yes"> 								MIT License
+
+
+
+	Copyright (c) [2017] [Telepathy]
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+</property>
+  </object>
+  <object class="GtkMessageDialog" id="licenseWindow">
+    <property name="can_focus">False</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="about_creditos2">
+                <property name="label" translatable="yes">The Team</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="show_team2" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="close_license">
+                <property name="label" translatable="yes">Close</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="close_license" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView" id="license">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_left">10</property>
+            <property name="margin_right">15</property>
+            <property name="margin_top">10</property>
+            <property name="margin_bottom">20</property>
+            <property name="buffer">textbuffer1</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkTextBuffer" id="textbuffer2">
+    <property name="text" translatable="yes">
+   Team Pluto is composed by the following 5 elements:
+
+	- Guilherme Ferreira 	/ 1150623
+	- Ricardo Catalão 	/ 1150385
+	- João Cardoso 		/ 1150943
+	- Eduangelo Ferreira	/ 1151094
+	- Diogo Guedes		/ 1150613
+
+</property>
+  </object>
+  <object class="GtkMessageDialog" id="theTeam">
+    <property name="can_focus">False</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="license_show">
+                <property name="label" translatable="yes">License</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="show_license2" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="closeTheTeam">
+                <property name="label" translatable="yes">Close</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="closeTheTeam" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Team Pluto</property>
+            <attributes>
+              <attribute name="font-desc" value="Akaash Medium 10"/>
+              <attribute name="weight" value="ultrabold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView" id="team">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_left">15</property>
+            <property name="margin_right">10</property>
+            <property name="buffer">textbuffer2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
       <placeholder/>
     </child>
   </object>

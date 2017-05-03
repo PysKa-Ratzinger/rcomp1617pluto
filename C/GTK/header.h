@@ -22,6 +22,18 @@ typedef struct {
 	GtkWidget *folderButton;
 	GtkWidget *helpButton;
 	GtkWidget *HelpAboutDialog;
+	
+	GtkWidget *theTeam;
+	GtkWidget *closeTheTeam;
+	GtkWidget *about_license;
+	GtkWidget *license_show;
+	GtkWidget *about_close;
+	GtkWidget *about_creditos;
+	GtkWidget *about_creditos2;
+	GtkWidget *licenseWindow;
+	GtkWidget *close_license;
+	
+	
 } AppWidgets;
 
 #if 1
