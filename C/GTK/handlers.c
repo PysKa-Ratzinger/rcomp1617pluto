@@ -4,7 +4,8 @@
 /*Closes App*/
 void close_app(UNUSED, AppWidgets *app){
 	
-	//Code Before closing comes here...
+	g_free(app);
+	//Code Before closing comes here... (cleanup)
 	gtk_main_quit();
 	
 }
@@ -27,7 +28,7 @@ void folder_set(UNUSED, AppWidgets *app){
 	/*GET FOLDER:*/
     gchar *folder =  gtk_file_chooser_get_uri ((GtkFileChooser*)app->folderButton);
 	if(folder != NULL){
-		printf("-------\nFOLDER: 	%s\n--------", folder);
+		printf("-------\nCHOSEN FOLDER: 	%s\n--------", folder);
 		
 		/**
 		 * WHAT TO DO WITH FOLDER?
@@ -43,12 +44,61 @@ void folder_set(UNUSED, AppWidgets *app){
 }
 
 void finish(UNUSED, AppWidgets *app){
+	
+	const gchar* nickname = gtk_entry_get_text((GtkEntry *) app->nickBox);
+	printf("\n-------\nUSERNAME: %s\n-------\n", nickname);
+	
+	
+	
+	
+	g_free((gpointer* )nickname);
 	gtk_main_quit();
 	printf("\n---------\nApp closed\n---------\n");
 }
 
 /* Show the About box */
 void help_about(UNUSED, AppWidgets *app){
-	gtk_dialog_run(GTK_DIALOG(app->HelpAboutDialog));
+	gtk_widget_hide(app->Start);
 	gtk_widget_show(app->HelpAboutDialog);
 }
+
+/*Close About box*/
+void closeHelpAbout(UNUSED, AppWidgets* app){
+	gtk_widget_hide(app->HelpAboutDialog);
+	gtk_widget_show(app->Start);
+}
+
+/*Show team info from About Dialog*/
+void show_team(UNUSED, AppWidgets* app){
+	gtk_widget_show(app->theTeam);
+}
+
+/*Show team info from license Dialog*/
+void show_team2(UNUSED, AppWidgets* app){
+	gtk_widget_hide(app->licenseWindow);
+	gtk_widget_show(app->theTeam);
+}
+
+/*Shows License from About Dialog*/
+void show_license(UNUSED, AppWidgets* app){
+	gtk_widget_show(app->licenseWindow);
+}
+
+/*Shows License from license Dialog*/
+void show_license2(UNUSED, AppWidgets* app){
+	gtk_widget_show(app->licenseWindow);
+	gtk_widget_hide(app->theTeam);
+}
+
+void close_license(UNUSED, AppWidgets* app){
+	gtk_widget_hide(app->licenseWindow);
+}
+
+/*Closes team info*/
+void closeTheTeam(UNUSED, AppWidgets* app){
+	gtk_widget_hide(app->theTeam);
+}
+
+
+
+
