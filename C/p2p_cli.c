@@ -74,19 +74,25 @@ void start_cli(struct control_st *ctrl){
       if(err == 1){
         char file[BUFFER_SIZE];
         char location[BUFFER_SIZE];
-        char temp;
-
+        char answer[BUFFER_SIZE];
         write(ctrl->udp_recv_pipe_out, "list ", 5);
         write(ctrl->udp_recv_pipe_out, &bf_addr.s_addr, sizeof(in_addr_t));
         write(ctrl->udp_recv_pipe_out, "\0", 1);
         kill(ctrl->udp_recv_pid, SIGUSR1);
         sem_wait(sem);  // Wait for process to be over
-
-        read(ctrl->udp_recv_pipe_in, &temp, sizeof(char));
-        if(temp == '0'){
+        read(ctrl->udp_recv_pipe_in, answer, BUFFER_SIZE);
+        if(answer[0] =='0'){
           printf("The specified peer either is not connected to the network\n"
                 "or it's not broadcasting it's presence. Cannot list files.\n");
-        }else if(temp == '1'){
+        }else if(answer[0] == '1'){
+          char tcp_port[BUFFER_SIZE];
+          char c[1];
+          int i=0;
+          do{
+            read(ctrl->udp_recv_pipe_in, c, 1);
+            tcp_port[i]=c[0];
+            i++;
+          }while(c[0] != '\0');
           printf("What file do you want to download?\n>");
           fgets(file, BUFFER_SIZE, stdin);
           remove_newline(file);
@@ -95,12 +101,13 @@ void start_cli(struct control_st *ctrl){
                 "full path)\n>");
           fgets(location, BUFFER_SIZE, stdin);
           remove_newline(location);
-
+          printf("TCP PORT = %s\n", tcp_port);
           write(ctrl->udp_recv_pipe_out, "get ", 4);
           write(ctrl->udp_recv_pipe_out, &bf_addr.s_addr, sizeof(in_addr_t));
           write(ctrl->udp_recv_pipe_out, "\0", 1);
           kill(ctrl->udp_recv_pid, SIGUSR1);
           sem_wait(sem);  // Wait for process to be over
+
         }else{
           fprintf(stderr, "broadcast: Unknown response from receiver.\n");
         }
