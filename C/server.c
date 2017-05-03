@@ -2,13 +2,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <sys/wait.h>
 #include <arpa/inet.h>
+#include <string.h>
 
 #include "server.h"
 #include "file_storage.h"
 #include "init.h"
+
+#define BUFFER_SIZE 512
+#define NUMBER_LIMIT 10
 
 static char *my_folder;
 
@@ -19,24 +25,26 @@ void end(int signal){
 
 void handle_request(int fd, struct sockaddr_storage *peer_addr,
                     socklen_t peer_addr_len){
-  char buffer[FILENAME_SIZE];
-  int index = 0;
+  char buffer[BUFFER_SIZE];
+  unsigned int index = 0;
+  ssize_t nbyte;
 
   if(inet_ntop(AF_INET, peer_addr, buffer, peer_addr_len) == NULL)
     handle_error("inet_ntop");
 
   printf("(%d) Got file request from %s\n", getpid(), buffer);
 
+  // ------------- Reads file name size ----------------------------
+
   while(1){
-    int nbyte = recv(fd, &buffer[index], 1, 0);
-    if(nbyte == 0){
+    nbyte = recv(fd, &buffer[index], 1, 0);
+    if(nbyte <= 0){
       fprintf(stderr, "(%d) Connection with client terminated "
               "abruptly.\n", getpid());
       close(fd);
       exit(EXIT_FAILURE);
     }
     char c = buffer[index];
-    printf("(%d) Got byte %c\n", getpid(), c);
     index += nbyte;
     if(c != ':' && (c < '0' || c > '9')){
       fprintf(stderr, "(%d) Client sent illegal request. "
@@ -45,7 +53,7 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
       exit(EXIT_FAILURE);
     }else if(c == ':'){
       break;
-    }else if(index >= 5){
+    }else if(index >= NUMBER_LIMIT){
       fprintf(stderr, "(%d) Number too long. Closing "
               "connection...\n", getpid());
       close(fd);
@@ -53,10 +61,145 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
     }
   }
 
-  unsigned int number = atoi(buffer);
+  // ------------- Checks file name size --------------------------
 
-  printf("(%d) Got number %d.\n", getpid(), number);
+  unsigned int filename_size = atoi(buffer);
+  printf("(%d) Got number %d.\n", getpid(), filename_size);
+
+  if(filename_size > FILENAME_SIZE-1){
+    printf("(%d) File name size is too long.\n", getpid());
+    printf("(%d) Closing connection...\n", getpid());
+    close(fd);
+    exit(EXIT_FAILURE);
+  }
+
+  unsigned int foldername_size = strlen(my_folder);
+  unsigned int fullpath_size = foldername_size + 1 + filename_size;
+  char *file = malloc(fullpath_size + 1);
+  memcpy(file, my_folder, foldername_size);
+
+  // ------------- Reads file name ----------------------------
+
+  index = foldername_size;
+  file[index++] = '/';
+  while(index < fullpath_size){
+    nbyte = recv(fd, &file[index], fullpath_size-index, 0);
+    if(nbyte <= 0){
+      fprintf(stderr, "(%d) Connection with client terminated "
+              "abruptly.\n", getpid());
+      free(file);
+      close(fd);
+      exit(EXIT_FAILURE);
+    }
+    index += nbyte;
+  }
+  file[index] = 0;
+  printf("(%d) Client requested file \"%s\"\n", getpid(), file);
+
+  // ------------- Checks file name --------------------------
+
+  unsigned int i;
+  for(i=foldername_size+1; i<index; i++){
+    if(file[i] == '/'){
+      printf("(%d) Client sent illegal request.\n", getpid());
+      printf("(%d) Closing connection...\n", getpid());
+      free(file);
+      close(fd);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  // ------------- Checks file type --------------------------
+
+  struct stat sb;
+  if(!(stat(file, &sb) == 0 && S_ISREG(sb.st_mode))){
+    printf("(%d) Client requested an illegal file.\n", getpid());
+    printf("(%d) Closing connection...\n", getpid());
+    free(file);
+    close(fd);
+    exit(EXIT_FAILURE);
+  }
+
+  // ------------- Opens file --------------------------
+
+  FILE* file_fd = fopen(file, "r");
+  free(file);
+
+  if(file_fd == NULL){
+    perror("open");
+    fclose(file_fd);
+    close(fd);
+    exit(EXIT_FAILURE);
+  }
+
+  // ------------- Checks file size --------------------------
+
+  fseek(file_fd, 0L, SEEK_END);
+  size_t real_filesize = ftell(file_fd);
+  fseek(file_fd, 0L, SEEK_SET);
+
+  ssize_t res = snprintf(buffer, BUFFER_SIZE, "%lu:", real_filesize);
+  if(res < 0){
+    perror("snprintf");
+    fclose(file_fd);
+    close(fd);
+    exit(EXIT_FAILURE);
+  }
+
+  // ------------- Sends file size --------------------------
+
+  index = 0;
+  while(index < res){
+    nbyte = send(fd, &buffer[index], res - index, 0);
+    if(nbyte <= 0){
+      fprintf(stderr, "(%d) Connection with client terminated "
+              "abruptly.\n", getpid());
+      fclose(file_fd);
+      close(fd);
+      exit(EXIT_FAILURE);
+    }
+    index += nbyte;
+  }
+
+  // ------------- Sends file --------------------------
+
+  while(real_filesize){
+    size_t block_size = real_filesize < BUFFER_SIZE ?
+                              real_filesize : BUFFER_SIZE;
+    size_t buffer_size = fread(buffer, 1, block_size, file_fd);
+
+    if(buffer_size == 0){
+      if(feof(file_fd)){
+        break;
+      }else if(ferror(file_fd)){
+        perror("fread");
+        fclose(file_fd);
+        close(fd);
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    index = 0;
+    while(index < buffer_size){
+      nbyte = send(fd, &buffer[index], buffer_size-index, 0);
+      if(nbyte <= 0){
+        fprintf(stderr, "(%d) Connection with client terminated "
+                "abruptly.\n", getpid());
+        fclose(file_fd);
+        close(fd);
+        exit(EXIT_FAILURE);
+      }
+      index += nbyte;
+    }
+
+    real_filesize -= buffer_size;
+  }
+  printf("(%d) File sent.\n", getpid());
+
+  // ------------- Closes connection --------------------------
+
   printf("(%d) Closing connection...\n", getpid());
+  fclose(file_fd);
   close(fd);
 }
 
@@ -115,7 +258,7 @@ int start_server(char* folder, int *tcp_port){
 
       case 0: /* Child behaviour */
         handle_request(fd, &peer_addr, peer_addr_len);
-        break;
+        exit(EXIT_SUCCESS);
 
       default:  /* Parent behaviour */
         close(fd); // We don't need the file descriptor anymore
