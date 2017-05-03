@@ -81,6 +81,10 @@ void usr_signal_handler(int signal){
           }
           printf("\n");
           write(pipe_out, "1", 1);
+          int tcp_port = curr->p_tcp_port;
+          char peer_tcp_port[6];
+          sprintf(peer_tcp_port, "%d", tcp_port);
+          write(pipe_out, peer_tcp_port, 6);
           break;
         }
         curr = curr->p_next;
@@ -89,6 +93,8 @@ void usr_signal_handler(int signal){
         write(pipe_out, "0", 1);
       }
     }
+
+  }else if(strncmp(buffer, "get", 4) == 0){
 
   }else{
     fprintf(stderr, "Got unknown command: \"%s\". Exiting...\n", buffer);

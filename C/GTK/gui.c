@@ -35,7 +35,8 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	
-	//Get handlers to our app widgets.
+	//Get handlers to our app widgets. 
+	//( So we can access any of them at any time)
 	#define appGET(xx) \
 	app->xx=GTK_WIDGET(gtk_builder_get_object(builder,#xx))
 	appGET(Start);
@@ -52,7 +53,15 @@ int main(int argc, char **argv) {
 	appGET(helpButton);
 	appGET(folderButton);
 	appGET(HelpAboutDialog);
-	
+	appGET(theTeam);
+	appGET(closeTheTeam);
+	appGET(about_license);
+	appGET(about_close);
+	appGET(about_creditos);
+	appGET(about_creditos2);
+	appGET(licenseWindow);
+	appGET(close_license);
+
 	
 	gtk_builder_connect_signals(builder, app);
 	g_object_unref(G_OBJECT(builder));
