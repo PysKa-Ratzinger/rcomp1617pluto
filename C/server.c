@@ -20,7 +20,7 @@ void end(int signal){
 void handle_request(int fd, struct sockaddr_storage *peer_addr,
                     socklen_t peer_addr_len){
   char buffer[FILENAME_SIZE];
-  int index = 0, nbyte;
+  int index = 0;
 
   if(inet_ntop(AF_INET, peer_addr, buffer, peer_addr_len) == NULL)
     handle_error("inet_ntop");
@@ -28,15 +28,36 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   printf("(%d) Got file request from %s\n", getpid(), buffer);
 
   while(1){
-    nbyte = recv(fd, &buffer[index], 1, 0);
+    int nbyte = recv(fd, &buffer[index], 1, 0);
     if(nbyte == 0){
       fprintf(stderr, "(%d) Connection with client terminated "
               "abruptly.\n", getpid());
+      close(fd);
       exit(EXIT_FAILURE);
     }
-    printf("(%d) Received byte '%c'.\n", getpid(), buffer[index]);
+    char c = buffer[index];
+    printf("(%d) Got byte %c\n", getpid(), c);
     index += nbyte;
+    if(c != ':' && (c < '0' || c > '9')){
+      fprintf(stderr, "(%d) Client sent illegal request. "
+              "Closing connection...\n", getpid());
+      close(fd);
+      exit(EXIT_FAILURE);
+    }else if(c == ':'){
+      break;
+    }else if(index >= 5){
+      fprintf(stderr, "(%d) Number too long. Closing "
+              "connection...\n", getpid());
+      close(fd);
+      exit(EXIT_FAILURE);
+    }
   }
+
+  unsigned int number = atoi(buffer);
+
+  printf("(%d) Got number %d.\n", getpid(), number);
+  printf("(%d) Closing connection...\n", getpid());
+  close(fd);
 }
 
 int start_server(char* folder, int *tcp_port){
