@@ -55,4 +55,4 @@ int init_tcp(int *sock_tcp);
 
 /**   Initializes the TCP port variable
  */
-int init_tcp_port_number(int sock_tcp, int *port);
+int init_tcp_listen(int sock_tcp, int *port);

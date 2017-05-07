@@ -13,7 +13,7 @@
 #include "file_storage.h"
 #include "init.h"
 
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 4096
 #define NUMBER_LIMIT 10
 
 static char *my_folder;
@@ -32,7 +32,7 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   if(inet_ntop(AF_INET, peer_addr, buffer, peer_addr_len) == NULL)
     handle_error("inet_ntop");
 
-  printf("(%d) Got file request from %s\n", getpid(), buffer);
+  fprintf(stderr, "(%d) Established connection with client %s.\n", buffer);
 
   // ------------- Reads file name size ----------------------------
 
@@ -67,8 +67,8 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   printf("(%d) Got number %d.\n", getpid(), filename_size);
 
   if(filename_size > FILENAME_SIZE-1){
-    printf("(%d) File name size is too long.\n", getpid());
-    printf("(%d) Closing connection...\n", getpid());
+    fprintf(stderr, "(%d) File name size is too long.\n", getpid());
+    fprintf(stderr, "(%d) Closing connection...\n", getpid());
     close(fd);
     exit(EXIT_FAILURE);
   }
@@ -94,15 +94,14 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
     index += nbyte;
   }
   file[index] = 0;
-  printf("(%d) Client requested file \"%s\"\n", getpid(), file);
 
   // ------------- Checks file name --------------------------
 
   unsigned int i;
   for(i=foldername_size+1; i<index; i++){
     if(file[i] == '/'){
-      printf("(%d) Client sent illegal request.\n", getpid());
-      printf("(%d) Closing connection...\n", getpid());
+      fprintf(stderr, "(%d) Client sent illegal request.\n", getpid());
+      fprintf(stderr, "(%d) Closing connection...\n", getpid());
       free(file);
       close(fd);
       exit(EXIT_FAILURE);
@@ -113,8 +112,8 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
 
   struct stat sb;
   if(!(stat(file, &sb) == 0 && S_ISREG(sb.st_mode))){
-    printf("(%d) Client requested an illegal file.\n", getpid());
-    printf("(%d) Closing connection...\n", getpid());
+    fprintf(stderr, "(%d) Client requested an illegal file.\n", getpid());
+    fprintf(stderr, "(%d) Closing connection...\n", getpid());
     free(file);
     close(fd);
     exit(EXIT_FAILURE);
@@ -194,11 +193,11 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
 
     real_filesize -= buffer_size;
   }
-  printf("(%d) File sent.\n", getpid());
+  fprintf(stderr, "(%d) File sent.\n", getpid());
 
   // ------------- Closes connection --------------------------
 
-  printf("(%d) Closing connection...\n", getpid());
+  fprintf(stderr, "(%d) Closing connection...\n", getpid());
   fclose(file_fd);
   close(fd);
 }
@@ -206,7 +205,7 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
 int start_server(char* folder, int *tcp_port){
   int sock_tcp;
   init_tcp(&sock_tcp);
-  init_tcp_port_number(sock_tcp, tcp_port);
+  init_tcp_listen(sock_tcp, tcp_port);
 
   my_folder = folder;
 

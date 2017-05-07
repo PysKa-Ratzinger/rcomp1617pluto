@@ -15,7 +15,7 @@
 /**
  * Returns the number of digits needed to print a short number
  */
-int num_places(unsigned short n);
+int num_places(unsigned int n);
 
 /**
  *    Asks the user for a valid folder name until the folder name

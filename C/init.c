@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <ifaddrs.h>
 
+static const int true_val = 1;
+
 int init_main_vars(struct main_var *vars){
   struct addrinfo hints, *list;
   int err;
@@ -138,6 +140,11 @@ int init_tcp(int *sock_tcp){
     if(sock == -1)
       continue;
 
+    err = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                     &true_val, sizeof(true_val));
+    if(err != 0)
+        continue;
+
     if(bind(sock, rq->ai_addr, rq->ai_addrlen) == 0)
       break;
 
@@ -150,11 +157,12 @@ int init_tcp(int *sock_tcp){
   }
 
   freeaddrinfo(list);
+
   *sock_tcp = sock;
   return 0;
 }
 
-int init_tcp_port_number(int sock_tcp, int *port){
+int init_tcp_listen(int sock_tcp, int *port){
   struct sockaddr_in sin;
   socklen_t len;
   int err, opt;

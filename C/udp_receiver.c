@@ -19,11 +19,13 @@
 #include "p2p_cli.h"
 
 #define BUFFER_SIZE 512
+#define DEF_IGNOREOWNADDR 1
 
 static int pipe_in = 0, pipe_out = 0, sock_udp_recv;
 static struct peer_info* pinfo = NULL;
 static sem_t* udp_sem = NULL;
 static sem_t* op_sem = NULL;
+static const char nullbyte = 0;
 
 void cleanup_udp_recv(){
   if(pipe_in) close(pipe_in);
@@ -82,9 +84,10 @@ void usr_signal_handler(int signal){
           printf("\n");
           write(pipe_out, "1", 1);
           int tcp_port = curr->p_tcp_port;
-          char peer_tcp_port[6];
-          sprintf(peer_tcp_port, "%d", tcp_port);
-          write(pipe_out, peer_tcp_port, 6);
+          char peer_tcp_port[10];
+          int nbyte = sprintf(peer_tcp_port, "%d", tcp_port);
+          write(pipe_out, peer_tcp_port, nbyte);
+          write(pipe_out, &nullbyte, 1);
           break;
         }
         curr = curr->p_next;
@@ -101,6 +104,7 @@ void usr_signal_handler(int signal){
   }
 
   sem_post(op_sem); // Signal it is done
+  printf("Signal sent.\n");
 }
 
 int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){
@@ -166,8 +170,10 @@ int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){
 
       if(temp.ss_family != AF_INET) continue; // We only want IPv4
 
+#if DEF_IGNOREOWNADDR
       if(is_own_address(&temp) == 0)
         continue; // This is our address, so we ignore it
+#endif
 
       err = parse_datagram(buffer, UDP_DATAGRAM_MAX_SIZE, &head_file, &port);
       if(err != 0) continue;

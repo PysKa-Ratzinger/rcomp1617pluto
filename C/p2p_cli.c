@@ -11,6 +11,7 @@
 #include "broadcast.h"
 #include "utils.h"
 #include "synchronize.h"
+#include "client.h"
 
 #define BUFFER_SIZE 512
 
@@ -85,15 +86,9 @@ void start_cli(struct control_st *ctrl){
           printf("The specified peer either is not connected to the network\n"
                 "or it's not broadcasting it's presence. Cannot list files.\n");
         }else if(answer[0] == '1'){
-          char tcp_port[BUFFER_SIZE];
-          char c[1];
-          int i=0;
-          do{
-            read(ctrl->udp_recv_pipe_in, c, 1);
-            tcp_port[i]=c[0];
-            i++;
-          }while(c[0] != '\0');
+          unsigned short port = atoi(&answer[1]);
           printf("What file do you want to download?\n>");
+          fflush(stdout);
           fgets(file, BUFFER_SIZE, stdin);
           remove_newline(file);
 
@@ -101,12 +96,8 @@ void start_cli(struct control_st *ctrl){
                 "full path)\n>");
           fgets(location, BUFFER_SIZE, stdin);
           remove_newline(location);
-          printf("TCP PORT = %s\n", tcp_port);
-          write(ctrl->udp_recv_pipe_out, "get ", 4);
-          write(ctrl->udp_recv_pipe_out, &bf_addr.s_addr, sizeof(in_addr_t));
-          write(ctrl->udp_recv_pipe_out, "\0", 1);
-          kill(ctrl->udp_recv_pid, SIGUSR1);
-          sem_wait(sem);  // Wait for process to be over
+          printf("TCP PORT = %u\n", port);
+          start_file_transfer(bf_addr, port, file, location);
 
         }else{
           fprintf(stderr, "broadcast: Unknown response from receiver.\n");
