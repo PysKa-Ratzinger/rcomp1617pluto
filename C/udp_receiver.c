@@ -104,7 +104,6 @@ void usr_signal_handler(int signal){
   }
 
   sem_post(op_sem); // Signal it is done
-  printf("Signal sent.\n");
 }
 
 int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){

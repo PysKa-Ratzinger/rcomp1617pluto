@@ -8,6 +8,7 @@
 #include "init.h"
 #include "client.h"
 #include "utils.h"
+#include "progress_bar.h"
 
 #define BUFFER_SIZE 4096
 
@@ -21,7 +22,7 @@ unsigned long start_file_transfer(const struct in_addr bf_addr,
     size_t totalsize, index;
     char *dyn_buffer;
     struct sockaddr_in addr;
-    char buffer[512];
+    char buffer[BUFFER_SIZE];
     FILE* output_file;
 
     // ------------------- INITIALIZE INFORMATION ------------------
@@ -129,6 +130,8 @@ unsigned long start_file_transfer(const struct in_addr bf_addr,
 
     file_size = atol(buffer);
     remaining_nbytes = file_size;
+    create_progress_bar();
+    update_progress_bar(file_size - remaining_nbytes, file_size);
     while(remaining_nbytes){
         nbyte = recv(sock_tcp, buffer, (BUFFER_SIZE > remaining_nbytes
                      ? remaining_nbytes : BUFFER_SIZE), 0);
@@ -155,6 +158,7 @@ unsigned long start_file_transfer(const struct in_addr bf_addr,
             return -1;
         }
         remaining_nbytes -= nbyte;
+        update_progress_bar(file_size - remaining_nbytes, file_size);
     }
 
     // ------------------- SUCCESS -----------------

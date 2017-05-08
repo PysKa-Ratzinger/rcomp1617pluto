@@ -38,6 +38,7 @@ void ctrl_c_handler(int signal){
 void cleanup(){
   if(ctrl.broadcast_pid) kill(ctrl.broadcast_pid, SIGTERM);
   if(ctrl.udp_recv_pid) kill(ctrl.udp_recv_pid, SIGTERM);
+  if(ctrl.server_pid) kill(ctrl.server_pid, SIGTERM);
   if(ctrl.udp_recv_pipe_in) close(ctrl.udp_recv_pipe_in);
   if(ctrl.udp_recv_pipe_out) close(ctrl.udp_recv_pipe_out);
   sem_unlink(SEM_BCAST_NAME);

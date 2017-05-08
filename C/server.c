@@ -32,7 +32,8 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   if(inet_ntop(AF_INET, peer_addr, buffer, peer_addr_len) == NULL)
     handle_error("inet_ntop");
 
-  fprintf(stderr, "(%d) Established connection with client %s.\n", buffer);
+  fprintf(stderr, "(%d) Established connection with client %s.\n",
+          getpid(), buffer);
 
   // ------------- Reads file name size ----------------------------
 
@@ -231,7 +232,7 @@ int start_server(char* folder, int *tcp_port){
 
     fd = accept(sock_tcp, (struct sockaddr*)&peer_addr, &peer_addr_len);
     if(fd == -1){
-      if(errno != EINTR){
+      if(errno != EINTR && errno != EAGAIN){
         handle_error("accept");
       }else{
         continue;

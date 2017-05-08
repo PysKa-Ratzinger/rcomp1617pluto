@@ -172,6 +172,16 @@ int init_tcp_listen(int sock_tcp, int *port){
   err = setsockopt(sock_tcp, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
   if(err == -1){ perror("setsockopt"); return -1; }
 
+  struct timeval timeout;
+  memset(&timeout, 0, sizeof(struct timeval));
+  timeout.tv_sec = 10;
+  if(setsockopt(sock_tcp, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout))
+          || setsockopt(sock_tcp, SOL_SOCKET, SO_RCVTIMEO,
+                        &timeout, sizeof(timeout))){
+      perror("setsockopt");
+      return -1;
+  }
+
   err = listen(sock_tcp, MAX_TCP_CONN);
   if(err == -1) { perror("listen"); return -1; }
 
