@@ -35,7 +35,7 @@ void start_cli(struct control_st *ctrl){
     exit(EXIT_FAILURE);
   }
 
-  printf(">");
+  printf("Type 'help' for a list of commands\n>");
   fflush(stdout);
   while(fgets(buffer, BUFFER_SIZE, stdin)){
     struct in_addr bf_addr;
@@ -96,7 +96,7 @@ void start_cli(struct control_st *ctrl){
                 "full path)\n>");
           fgets(location, BUFFER_SIZE, stdin);
           remove_newline(location);
-          printf("TCP PORT = %u\n", port);
+          fprintf(stderr, "TCP PORT = %u\n", port);
           start_file_transfer(bf_addr, port, file, location);
 
         }else{
@@ -108,7 +108,7 @@ void start_cli(struct control_st *ctrl){
         fprintf(stderr, "Unspecified error occurred.\n");
       }
     }else{
-        fprintf(stderr, "Type 'help' for a list of commands\n");
+        printf("Type 'help' for a list of commands\n");
     }
     printf(">");
     fflush(stdout);

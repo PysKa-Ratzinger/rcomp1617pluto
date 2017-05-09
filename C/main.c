@@ -49,6 +49,7 @@ void cleanup(){
 int main(){
   sem_t* sem[3];
   char folder[BUFFER_SIZE];
+  char nick[BUFFER_SIZE];
 
   ctrl.parent_pid = getpid();
   if(signal(SIGINT, ctrl_c_handler) == SIG_ERR)
@@ -73,6 +74,8 @@ int main(){
     exit(EXIT_FAILURE);
   }
   read_folder(folder, BUFFER_SIZE);
+  read_nick(nick, BUFFER_SIZE);
+  vars.nickname = nick;
   ctrl.server_pid = start_server(folder, &vars.tcp_port);
   fprintf(stderr, "Server process pid:      %d - port: %d\n",
           ctrl.server_pid, vars.tcp_port);

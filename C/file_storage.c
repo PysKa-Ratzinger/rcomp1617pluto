@@ -12,6 +12,8 @@
 #include "utils.h"
 #include "broadcast.h"
 
+#define MAX_VERSION 3
+
 struct file_storage* createfsinfo(char* folder_name){
   struct file_storage *res;
 
@@ -153,7 +155,8 @@ void construct_udp_data(struct main_var *vars, char* data,
   size_t res = 0;
   struct file_info *curr = storage->f_headfile;
 
-  res += sprintf(data, "PLUTO_v2;tport:%dd", vars->tcp_port);
+  res += sprintf(data, "PLUTO_v3;tport:%d;nick:%s;d",
+                 vars->tcp_port, vars->nickname);
   while(curr != NULL){
     if((res + num_places((unsigned short)curr->f_bytes) + 1
         + curr->f_bytes + 1) > UDP_DATAGRAM_MAX_SIZE){
@@ -171,13 +174,14 @@ void construct_udp_data(struct main_var *vars, char* data,
 }
 
 int parse_datagram(char *buffer, size_t buffer_max_size,
-                  struct file_info **head_file, int *port){
-  enum state {HEADER, VERSION, PORT, DICT_START, DICT, DICT_END, ENTRY, END};
+                  struct peer_info *peer_info){
+  enum state {HEADER, VERSION, PORT, NICK, DICT_START,
+              DICT, DICT_END, ENTRY, END};
   int i, version, tport, nbyte, err = 0;
   struct file_info *head, *curr;
   enum state st = HEADER;
   char name[UDP_DATAGRAM_MAX_SIZE];
-  char c, *p, *end;
+  char c, *p, *end, *nick;
 
   p = buffer;
   end = buffer + buffer_max_size;
@@ -224,7 +228,7 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
           break;
         }
 
-        if(version > 2 || version <= 0){
+        if(version > MAX_VERSION || version <= 0){
           fprintf(stderr, "parse_datagram: Datagram application protocol has "
                           "unknown version at %s. Skipping...\n", p);
           err = 2;
@@ -276,6 +280,56 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
           err = 2;
           break;
         }
+
+        if(*p != ';'){
+          fprintf(stderr, "parse_datagram: Expected ';' after port number. "
+                          "Skipping...");
+          err = 2;
+          break;
+        }
+        p++;
+
+        if(version >= 3){
+            st = NICK;
+        }else{
+            st = DICT_START;
+        }
+        break;
+
+      case NICK:
+          // Check nickname header
+        if(p + 5 >= end){ err = 1; break;};
+        if(strncmp(p, "nick:", 5) != 0){
+          fprintf(stderr, "parse_datagram: Datagram application protocol does "
+                          "not have correct header.\n");
+          err = 2;
+          break;
+        }
+        p += 5;
+
+        // Check nick size (variable i)
+        c = *p;
+        i = 0;
+        while(i < NICK_MAX_DIGITS && c != '\0' && c != ';'){
+          p++; i++;
+          if(p == end){ err = 1; break;};
+          c = *p;
+        }
+        if(err) break;
+
+        if(c != ';'){
+            fprintf(stderr, "parse_datagram: Nickname has more than 15 "
+                    "characters. Skipping...\n");
+            err = 2;
+            break;
+        }
+
+        // Process nick
+        nick = malloc(i+1);
+        memcpy(nick, p-i, i);
+        nick[i] = '\0';
+
+        p++;
         st = DICT_START;
         break;
 
@@ -359,8 +413,9 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
         break;
 
       case DICT_END:
-        *head_file = head;
-        *port = tport;
+        peer_info->p_headfile = head;
+        peer_info->p_tcp_port = tport;
+        peer_info->p_nickname = nick;
         st = END;
         break;
 
@@ -368,6 +423,7 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
     }
     if(err != 0){
       if(head) freeflistinfo(head);
+      if(nick) free(nick);
       if(err == 1)
         fprintf(stderr, "parse_datagram: Buffer too small or message to large. "
                         "Skippin...\n");

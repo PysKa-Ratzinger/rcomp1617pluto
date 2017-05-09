@@ -59,7 +59,7 @@ void usr_signal_handler(int signal){
         printf("Listing all connected peers:\n");
         while(curr){
           inet_ntop(AF_INET, &curr->p_addr.sin_addr, buffer, INET_ADDRSTRLEN);
-          printf("\t - %s\n", buffer);
+          printf("\t - %s - %s\n", buffer, curr->p_nickname);
           curr = curr->p_next;
         }
         printf("\n");
@@ -159,9 +159,9 @@ int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){
   while(1){
     struct sockaddr_storage temp;
     socklen_t temp_len;
-    struct file_info *head_file;
     char buffer[UDP_DATAGRAM_MAX_SIZE];
-    int nbytes, port;
+    int nbytes;
+    struct peer_info peer_info;
 
     if((nbytes = recvfrom(sock_udp_recv, buffer, UDP_DATAGRAM_MAX_SIZE, 0,
       (struct sockaddr*)&temp, &temp_len)) > 0){
@@ -174,11 +174,11 @@ int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){
         continue; // This is our address, so we ignore it
 #endif
 
-      err = parse_datagram(buffer, UDP_DATAGRAM_MAX_SIZE, &head_file, &port);
+      err = parse_datagram(buffer, UDP_DATAGRAM_MAX_SIZE, &peer_info);
       if(err != 0) continue;
       remove_old_plist();
-      update_plist((struct sockaddr_in*)&temp, temp_len, head_file,
-                    time(NULL), port);
+      update_plist((struct sockaddr_in*)&temp, temp_len,
+                   &peer_info, time(NULL));
 
     }else if(nbytes == -1){
       if(errno != EINTR){
@@ -218,8 +218,7 @@ int is_own_address(struct sockaddr_storage *temp){
 }
 
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
-                  struct file_info* head_file, time_t abstime,
-                  int tcp_port){
+                  struct peer_info *info, time_t abstime){
   struct peer_info *curr, *prev;
   char peer_name[INET_ADDRSTRLEN];
   int lastItem = 0;
@@ -245,8 +244,10 @@ void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
       memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));
       curr->p_addr_len = np_addr_len;
       curr->p_lastupdated = abstime;
-      curr->p_headfile = head_file;
-      curr->p_tcp_port = tcp_port;
+      curr->p_headfile = info->p_headfile;
+      curr->p_tcp_port = info->p_tcp_port;
+      curr->p_version = info->p_version;
+      curr->p_nickname = info->p_nickname;
       break;
     }
     prev = curr;
@@ -286,7 +287,8 @@ void remove_old_plist(){
 
 void free_peer_info(struct peer_info* peer){
   if(peer == NULL) return;
-  if(peer->p_headfile != NULL) freeflistinfo(peer->p_headfile);
+  if(peer->p_headfile) freeflistinfo(peer->p_headfile);
+  if(peer->p_nickname) free(peer->p_nickname);
   free(peer);
 }
 

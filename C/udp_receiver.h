@@ -11,16 +11,22 @@
 
  #include <time.h>
 
- #include "init.h"
+struct peer_info;
+
+#include "init.h"
  #include "file_storage.h"
 
+#define NICK_MAX_DIGITS 15
+
 struct peer_info{
-  struct sockaddr_in      p_addr;
-  socklen_t               p_addr_len;
-  int                     p_tcp_port;
-  struct file_info*       p_headfile;
-  time_t                  p_lastupdated;
-  struct peer_info*       p_next;
+  int                   p_version;
+  struct sockaddr_in    p_addr;
+  socklen_t             p_addr_len;
+  int                   p_tcp_port;
+  char*                 p_nickname;
+  struct file_info*     p_headfile;
+  time_t                p_lastupdated;
+  struct peer_info*     p_next;
 };
 
 /**
@@ -51,8 +57,7 @@ int is_own_address(struct sockaddr_storage *temp);
  *    Updates the list of connected peers using a red-black
  */
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
-                  struct file_info* head_file, time_t abstime,
-                  int tcp_port);
+                  struct peer_info* info, time_t abstime);
 
 /**
  *    For every peer_info present in a list of known peer's, the current

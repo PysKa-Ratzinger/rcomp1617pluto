@@ -24,6 +24,12 @@ int num_places(unsigned int n);
 void read_folder(char* folder, size_t buffer_size);
 
 /**
+ *    Asks the user for a valid nickname and confirmation. The resulting
+ *  nick is stored in the buffer passed as an argument
+ */
+void read_nick(char* nick, size_t buffer_size);
+
+/**
  *    Checks if the string passed as an argument has a '\n' before the
  *  null terminator. If it has, the '\n' is replaced with a null terminator,
  *  making the string 1 byte shorter. The new size of the string is

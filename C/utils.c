@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 
 #include "utils.h"
+#include "udp_receiver.h"
 
 int num_places(unsigned int n){
   if (n < 10) return 1;
@@ -21,7 +22,7 @@ int num_places(unsigned int n){
 void read_folder(char* folder, size_t buffer_size){
   struct stat sb;
 
-  printf("Which folder would you like to share over the network?\n>");
+  printf("Which folder would you like to share over the network?\n#");
   while(1){
     fflush(stdout);
     fgets(folder, buffer_size, stdin);
@@ -35,16 +36,44 @@ void read_folder(char* folder, size_t buffer_size){
   }
 }
 
+void read_nick(char *nick, size_t buffer_size){
+    int valid;
+
+    printf("What nickname do you want to give this machine?\n"
+           "Cannot contain the character ';' and max 15 characters long\n#");
+    while(1){
+        fflush(stdout);
+        fgets(nick, buffer_size, stdin);
+        remove_n_newline(nick, buffer_size);
+
+        valid = 1;
+        unsigned int i;
+        for(i=0; i<buffer_size; i++){
+            char c = nick[i];
+            if(c == '\0')
+                break;
+            if(c == ';'){
+                valid = 0;
+                break;
+            }
+        }
+        if(valid && strlen(nick) <= NICK_MAX_DIGITS) break;
+        printf("The nickname you entered is invalid. Try again.\n>");
+    }
+}
+
 size_t remove_newline(char* string){
   return remove_n_newline(string, strlen(string));
 }
 
 size_t remove_n_newline(char* string, size_t string_size){
   if(string_size == 0) return 0;
-  char *p = string + string_size - 1;
-  if(*p == '\n'){
-    *p = '\0';
-    return string_size - 1;
+  size_t i;
+  for(i=0; i<string_size; i++){
+      if(string[i] == '\n'){
+          string[i] = '\0';
+          break;
+      }
   }
-  return string_size;
+  return i+1;
 }

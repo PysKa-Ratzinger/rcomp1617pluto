@@ -9,7 +9,11 @@
  *            handling
  */
 
+struct file_info;
+struct file_storage;
+
 #include "init.h"
+#include "udp_receiver.h"
 
 #define FILENAME_SIZE 512
 
@@ -114,4 +118,4 @@ void construct_udp_data(struct main_var *vars, char* data,
  *    Parses the information of a UDP datagram.
  */
 int parse_datagram(char *buffer, size_t buffer_max_size,
-                  struct file_info **head_file, int *port);
+                  struct peer_info *peer_info);

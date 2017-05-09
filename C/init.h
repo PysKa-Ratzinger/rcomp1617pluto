@@ -23,8 +23,9 @@
 #define MAX_TCP_CONN 5
 
 struct main_var{
-  struct sockaddr_in bcast_addr;  // broadcast address
-  socklen_t bcast_addrlen;        // broadcast address length
+  struct sockaddr_in bcast_addr;  // Broadcast address
+  socklen_t bcast_addrlen;        // Broadcast address length
+  char *nickname;                 // Machine Nickname
   int tcp_port;                   // TCP port number
 };
 
