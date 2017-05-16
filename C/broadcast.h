@@ -18,7 +18,8 @@
  *  RETURNS:
  *    Returns the child pid of the created process.
  */
-int start_broadcast(struct main_var *vars, char *folder);
+int start_broadcast(struct main_var *vars, char *folder,
+                    struct control_st *ctrl);
 
 /**
  *    Stops the udp packet broadcasting for the process corresponding

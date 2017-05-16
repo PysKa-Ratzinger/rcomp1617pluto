@@ -18,21 +18,25 @@
 #include "init.h"
 #include "udp_receiver.h"
 
-static struct file_storage* storage;
+static struct file_storage *storage;
+static struct control_st *m_ctrl;
 static sem_t *sem;
 static int sock_udp_send;
 
 void cleanup_broadcast(){
+  kill(m_ctrl->parent_pid, SIGTERM);
   freefsinfo(storage);
   sem_close(sem);
 }
 
-int start_broadcast(struct main_var *vars, char *folder){
+int start_broadcast(struct main_var *vars, char *folder,
+                  struct control_st *ctrl){
   struct timespec abs_timeout;
   size_t data_len;
   int pid, err;
   char data[UDP_DATAGRAM_MAX_SIZE];
 
+  m_ctrl = ctrl;
   switch((pid = fork())){
     case -1:
       perror("fork");
