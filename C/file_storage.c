@@ -275,8 +275,6 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
         if(version >= 4){
           st = ID;
         }else{
-          freeflistinfo(peer_info->p_headfile);
-          peer_info->p_headfile = NULL;
           st = PORT;
         }
         break;
@@ -316,20 +314,7 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
         }
         p++;
 
-        if(id == peer_info->p_id){
-          head = peer_info->p_headfile;
-          curr = head;
-          if(curr){
-            while(curr->f_next)
-              curr = curr->f_next;
-          }
-        }else if(peer_info->p_headfile){
-          freeflistinfo(peer_info->p_headfile);
-          peer_info->p_headfile = NULL;
-        }
-
         peer_info->p_id = id;
-
         st = PORT;
         break;
 

@@ -242,10 +242,23 @@ void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
       memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));
       curr->p_addr_len = np_addr_len;
       curr->p_lastupdated = abstime;
-      curr->p_headfile = info->p_headfile;
       curr->p_tcp_port = info->p_tcp_port;
       curr->p_version = info->p_version;
       curr->p_nickname = info->p_nickname;
+      if(curr->p_id == info->p_id){
+        struct file_info * tail;
+        if(curr->p_headfile == NULL){
+          curr->p_headfile = info->p_headfile;
+        }else{
+          tail = curr->p_headfile;
+          while(tail->f_next) tail = tail->f_next;
+          tail->f_next = info->p_headfile;
+        }
+      }else{
+        curr->p_id = info->p_id;
+        if(curr->p_headfile) freeflistinfo(curr->p_headfile);
+        curr->p_headfile = info->p_headfile;
+      }
       break;
     }
     prev = curr;
