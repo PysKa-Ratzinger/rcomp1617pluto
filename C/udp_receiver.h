@@ -22,7 +22,8 @@ struct peer_info{
   int                   p_version;
   struct sockaddr_in    p_addr;
   socklen_t             p_addr_len;
-  int                   p_tcp_port;
+  unsigned short        p_id;
+  unsigned short        p_tcp_port;
   char*                 p_nickname;
   struct file_info*     p_headfile;
   time_t                p_lastupdated;

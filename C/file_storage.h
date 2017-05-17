@@ -15,7 +15,7 @@ struct file_storage;
 #include "init.h"
 #include "udp_receiver.h"
 
-#define FILENAME_SIZE 512
+#define FILENAME_SIZE 256
 
  /**
   *    file_info structure
@@ -46,6 +46,15 @@ struct file_storage;
 struct file_storage{
   char*             f_folder;
   struct file_info* f_headfile; // First file of the linked list
+};
+
+/**
+ *    UDP Datagrams linked list
+ */
+struct udp_datagrams{
+	char*                 u_data;
+  size_t                u_len;
+	struct udp_datagrams* u_next;
 };
 
 /**
@@ -111,8 +120,14 @@ void printflistinfo(struct file_info* head_file);
  *  will not be able to support every file. In that case, the file list
  *  is truncated and an error message is sent to 'stderr'.
  */
-void construct_udp_data(struct main_var *vars, char* data,
-                        struct file_storage* storage, size_t* data_len);
+struct udp_datagrams* construct_udp_data(struct main_var *vars,
+                                        struct file_storage* storage,
+                                        unsigned short id);
+
+/**
+ *    Frees the memory allocated for the udp_datagrams
+ */
+void free_udp_datagrams(struct udp_datagrams* target);
 
 /**
  *    Parses the information of a UDP datagram.

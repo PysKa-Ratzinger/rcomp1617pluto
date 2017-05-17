@@ -22,6 +22,7 @@ static struct file_storage *storage;
 static struct control_st *m_ctrl;
 static sem_t *sem;
 static int sock_udp_send;
+static unsigned short static_id = 0;
 
 void cleanup_broadcast(){
   kill(m_ctrl->parent_pid, SIGTERM);
@@ -32,9 +33,7 @@ void cleanup_broadcast(){
 int start_broadcast(struct main_var *vars, char *folder,
                   struct control_st *ctrl){
   struct timespec abs_timeout;
-  size_t data_len;
   int pid, err;
-  char data[UDP_DATAGRAM_MAX_SIZE];
 
   m_ctrl = ctrl;
   switch((pid = fork())){
@@ -64,15 +63,24 @@ int start_broadcast(struct main_var *vars, char *folder,
 
   while(1){
     int nbyte, s;
+    struct udp_datagrams *data, *curr;
 
     storage = createfsinfo(folder);
-    construct_udp_data(vars, data, storage, &data_len);
-    nbyte = sendto(sock_udp_send, data, data_len, 0,
-                    (struct sockaddr*)&vars->bcast_addr, vars->bcast_addrlen);
-    if(nbyte == -1){
-      perror("sendto");
-      exit(EXIT_FAILURE);
+
+    // SEND UDP DATAGRAMS
+    data = construct_udp_data(vars, storage, ++static_id);
+    curr = data;
+    while(curr){
+      nbyte = sendto(sock_udp_send, curr->u_data, curr->u_len, 0,
+                      (struct sockaddr*)&vars->bcast_addr, vars->bcast_addrlen);
+      if(nbyte == -1){
+        perror("sendto");
+        exit(EXIT_FAILURE);
+      }
+      curr = curr->u_next;
     }
+
+    free_udp_datagrams(data);
 
     if(clock_gettime(CLOCK_REALTIME, &abs_timeout) == -1){
       perror("clock_gettime");

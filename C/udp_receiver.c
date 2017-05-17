@@ -235,10 +235,6 @@ void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
         curr = (struct peer_info*) malloc(sizeof(struct peer_info));
         memset(curr, 0, sizeof(struct peer_info)); // Set all values to 0
         lastItem = 1;
-      }else{
-        if(curr->p_headfile)  // Shared folder may be empty
-          freeflistinfo(curr->p_headfile);
-        curr->p_headfile = NULL;
       }
 
       memcpy(&curr->p_addr, np_addr, sizeof(struct sockaddr_in));
@@ -273,7 +269,7 @@ void remove_old_plist(){
       inet_ntop(AF_INET, &curr->p_addr.sin_addr, peer_name, INET_ADDRSTRLEN);
       fprintf(stderr, "Peer %s timed out. Removing from list.\n", peer_name);
       free_peer_info(curr);
-      if(prev == NULL) pinfo = curr;  // If curr is the first one
+      if(prev == NULL) pinfo = next;  // If curr is the first one
       else prev->p_next = next;
     }else{
       prev = curr;

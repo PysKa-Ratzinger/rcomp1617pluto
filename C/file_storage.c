@@ -12,8 +12,6 @@
 #include "utils.h"
 #include "broadcast.h"
 
-#define MAX_VERSION 3
-
 struct file_storage* createfsinfo(char* folder_name){
   struct file_storage *res;
 
@@ -150,34 +148,67 @@ void printflistinfo(struct file_info* head_file){
   printf("\n");
 }
 
-void construct_udp_data(struct main_var *vars, char* data,
-                        struct file_storage* storage, size_t* data_len){
-  size_t res = 0;
+struct udp_datagrams* construct_udp_data(struct main_var *vars,
+                                         struct file_storage* storage,
+					                               unsigned short id){
+  size_t res;
   struct file_info *curr = storage->f_headfile;
+  struct udp_datagrams *res_data, *curr_udp;
+  int has_next = 1;
 
-  res += sprintf(data, "PLUTO_v3;tport:%d;nick:%s;d",
-                 vars->tcp_port, vars->nickname);
-  while(curr != NULL){
-    if((res + num_places((unsigned short)curr->f_bytes) + 1
-        + curr->f_bytes + 1) > UDP_DATAGRAM_MAX_SIZE){
-      fprintf(stderr, "Could not broadcast all files. UDP max datagram "
-                      "does not allow it\n");
-      break;
-    }else{
-      res += sprintf(data + res, "%d:%s", curr->f_bytes, curr->f_name);
+  res_data = (struct udp_datagrams*) malloc(sizeof(struct udp_datagrams));
+  curr_udp = res_data;
+
+  while(has_next){
+    res = 0;
+    has_next = 0;
+    memset(curr_udp, 0, sizeof(struct udp_datagrams));
+    curr_udp->u_data = (char*) malloc(UDP_DATAGRAM_MAX_SIZE);
+    // UDP Datagram initializer
+    res += sprintf(curr_udp->u_data, "PLUTO_v%u;%hu;tport:%d;nick:%s;d",
+                   CURR_VERSION, id, vars->tcp_port, vars->nickname);
+
+    // Filling with file information
+    while(curr != NULL){
+      if((res + num_places((unsigned short)curr->f_bytes) + 1
+          + curr->f_bytes + 1) > UDP_DATAGRAM_MAX_SIZE){
+        has_next = 1;
+        break;
+      }else{
+        res += sprintf(curr_udp->u_data + res, "%d:%s", curr->f_bytes,
+                        curr->f_name);
+      }
+      curr = curr->f_next;
     }
-    curr = curr->f_next;
-  }
-  res += sprintf(data + res, "e");
+    res += sprintf(curr_udp->u_data + res, "e");
+    curr_udp->u_len = res;
 
-  *data_len = res;
+    if(has_next){
+      curr_udp->u_next = (struct udp_datagrams*)
+                          malloc(sizeof(struct udp_datagrams));
+      curr_udp = curr_udp->u_next;
+    }
+  }
+  return res_data;
+}
+
+void free_udp_datagrams(struct udp_datagrams* target){
+  struct udp_datagrams *curr, *next;
+
+  curr = target;
+  while(curr){
+    next = curr->u_next;
+    free(curr->u_data);
+    free(curr);
+    curr = next;
+  }
 }
 
 int parse_datagram(char *buffer, size_t buffer_max_size,
                   struct peer_info *peer_info){
-  enum state {HEADER, VERSION, PORT, NICK, DICT_START,
+  enum state {HEADER, VERSION, ID, PORT, NICK, DICT_START,
               DICT, DICT_END, ENTRY, END};
-  int i, version, tport, nbyte, err = 0;
+  int i, version, id, tport, nbyte, err = 0;
   struct file_info *head, *curr;
   enum state st = HEADER;
   char name[UDP_DATAGRAM_MAX_SIZE];
@@ -228,7 +259,7 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
           break;
         }
 
-        if(version > MAX_VERSION || version <= 0){
+        if(version > CURR_VERSION || version <= 0){
           fprintf(stderr, "parse_datagram: Datagram application protocol has "
                           "unknown version at %s. Skipping...\n", p);
           err = 2;
@@ -241,6 +272,65 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
           break;
         }
         p++;
+
+        if(version >= 4){
+          st = ID;
+        }else{
+          freeflistinfo(peer_info->p_headfile);
+          peer_info->p_headfile = NULL;
+          st = PORT;
+        }
+        break;
+
+      case ID:
+          // Parse id
+        c = *p;
+        i = 0;
+        id = 0;
+        while(i < 20 && c >= '0' && c <= '9'){
+          id = id * 10 + c - '0';
+          p++; i++;
+          if(p == end){ err = 1; break;};
+          c = *p;
+        }
+        if(err) break;
+
+        if(i == 20){
+          fprintf(stderr, "parse_datagram: Datagram id "
+                          "number has too many digits.\n");
+          err = 2;
+          break;
+        }
+
+        if(id < 0 || id > USHRT_MAX){
+          fprintf(stderr, "parse_datagram: Specified id number is out of "
+                          "bounds. Skipping...\n");
+          err = 2;
+          break;
+        }
+
+        if(*p != ';'){
+          fprintf(stderr, "parse_datagram: Expected ';' after id number. "
+                          "Skipping...");
+          err = 2;
+          break;
+        }
+        p++;
+
+        if(id == peer_info->p_id){
+          head = peer_info->p_headfile;
+          curr = head;
+          if(curr){
+            while(curr->f_next)
+              curr = curr->f_next;
+          }
+        }else if(peer_info->p_headfile){
+          freeflistinfo(peer_info->p_headfile);
+          peer_info->p_headfile = NULL;
+        }
+
+        peer_info->p_id = id;
+
         st = PORT;
         break;
 
@@ -325,7 +415,7 @@ int parse_datagram(char *buffer, size_t buffer_max_size,
         }
 
         // Process nick
-        nick = malloc(i+1);
+        nick = (char*)malloc(i+1);
         memcpy(nick, p-i, i);
         nick[i] = '\0';
 
