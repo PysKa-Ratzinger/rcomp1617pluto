@@ -102,7 +102,7 @@ int updatefs(struct file_storage* storage){
 }
 
 int cleanfs(struct file_storage* storage){
-  if(storage->f_headfile == NULL)
+  if(!storage || !storage->f_headfile)
     return -1;
 
   freeflistinfo(storage->f_headfile);
@@ -116,20 +116,19 @@ void freeflistinfo(struct file_info* flist){
 
   curr = flist;
 
-  do{
+  while(curr){
     next = curr->f_next;
-    free(curr->f_name);
+    if(curr->f_name) free(curr->f_name);
     free(curr);
     curr = next;
-  }while(curr != NULL);
+  }
 
 }
 
 void freefsinfo(struct file_storage* storage){
   if(storage == NULL) return;
   cleanfs(storage);
-  if(storage->f_folder != NULL)
-    free(storage->f_folder);
+  if(!storage->f_folder) free(storage->f_folder);
   free(storage);
 }
 
@@ -198,7 +197,7 @@ void free_udp_datagrams(struct udp_datagrams* target){
   curr = target;
   while(curr){
     next = curr->u_next;
-    free(curr->u_data);
+    if(curr->u_data) free(curr->u_data);
     free(curr);
     curr = next;
   }
