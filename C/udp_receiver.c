@@ -198,15 +198,17 @@ int is_own_address(struct sockaddr_storage *temp){
 
   err = getifaddrs(&head);
 
-  if(err != 0)
+  if(err != 0){
+    perror("getifaddrs");
     return err;
+  }
 
   curr = head;
   while(curr){
     if(curr->ifa_addr->sa_family == AF_INET){
       if(memcmp(&((struct sockaddr_in*)curr->ifa_addr)->sin_addr,
                 &((struct sockaddr_in*)temp)->sin_addr,
-                sizeof(struct sockaddr_in)) == 0){
+                sizeof(struct in_addr)) == 0){
         freeifaddrs(head);
         return 0;
       }
