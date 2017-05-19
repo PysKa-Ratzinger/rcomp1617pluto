@@ -22,7 +22,7 @@ int num_places(unsigned int n){
 void read_folder(char* folder, size_t buffer_size){
   struct stat sb;
 
-  printf("Which folder would you like to share over the network?\n#");
+  printf(">");
   while(1){
     fflush(stdout);
     fgets(folder, buffer_size, stdin);
@@ -39,8 +39,7 @@ void read_folder(char* folder, size_t buffer_size){
 void read_nick(char *nick, size_t buffer_size){
     int valid;
 
-    printf("What nickname do you want to give this machine?\n"
-           "Cannot contain the character ';' and max 15 characters long\n#");
+    printf(">");
     while(1){
         fflush(stdout);
         fgets(nick, buffer_size, stdin);

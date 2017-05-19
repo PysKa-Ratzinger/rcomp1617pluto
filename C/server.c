@@ -29,7 +29,12 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   unsigned int index = 0;
   ssize_t nbyte;
 
-  if(inet_ntop(AF_INET, peer_addr, buffer, peer_addr_len) == NULL)
+  if(peer_addr->ss_family != AF_INET)
+    return;
+
+  (void) peer_addr_len;
+  if(inet_ntop(AF_INET, &((struct sockaddr_in*)peer_addr)->sin_addr,
+                buffer, BUFFER_SIZE) == NULL)
     handle_error("inet_ntop");
 
   fprintf(stderr, "(%d) Established connection with client %s.\n",
@@ -65,7 +70,6 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   // ------------- Checks file name size --------------------------
 
   unsigned int filename_size = atoi(buffer);
-  printf("(%d) Got number %d.\n", getpid(), filename_size);
 
   if(filename_size > FILENAME_SIZE-1){
     fprintf(stderr, "(%d) File name size is too long.\n", getpid());
@@ -76,7 +80,7 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
 
   unsigned int foldername_size = strlen(my_folder);
   unsigned int fullpath_size = foldername_size + 1 + filename_size;
-  char *file = malloc(fullpath_size + 1);
+  char *file = (char*) malloc(fullpath_size + 1);
   memcpy(file, my_folder, foldername_size);
 
   // ------------- Reads file name ----------------------------
@@ -95,6 +99,7 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
     index += nbyte;
   }
   file[index] = 0;
+  fprintf(stderr, "(%d) Client requested file \"%s\"\n", getpid(), file);
 
   // ------------- Checks file name --------------------------
 
@@ -197,8 +202,6 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   fprintf(stderr, "(%d) File sent.\n", getpid());
 
   // ------------- Closes connection --------------------------
-
-  fprintf(stderr, "(%d) Closing connection...\n", getpid());
   fclose(file_fd);
   close(fd);
 }

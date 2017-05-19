@@ -92,10 +92,8 @@ void start_cli(struct control_st *ctrl){
           fgets(file, BUFFER_SIZE, stdin);
           remove_newline(file);
 
-          printf("Where do you want to save the file? (please insert "
-                "full path)\n>");
-          fgets(location, BUFFER_SIZE, stdin);
-          remove_newline(location);
+          printf("Where do you want to save the file?\n");
+          read_folder(location, BUFFER_SIZE);
           fprintf(stderr, "TCP PORT = %u\n", port);
           start_file_transfer(bf_addr, port, file, location);
 

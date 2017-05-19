@@ -73,7 +73,11 @@ int main(){
     printf("[ERROR] Initialization of main variables failed. Quitting...\n");
     exit(EXIT_FAILURE);
   }
+
+  printf("Which folder would you like to share over the network?\n");
   read_folder(folder, BUFFER_SIZE);
+  printf("What nickname do you want to give this machine?\n"
+         "Cannot contain the character ';' and max 15 characters long\n");
   read_nick(nick, BUFFER_SIZE);
   vars.nickname = nick;
   ctrl.server_pid = start_server(folder, &vars.tcp_port);
