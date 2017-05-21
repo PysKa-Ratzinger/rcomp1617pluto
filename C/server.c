@@ -234,6 +234,7 @@ int start_server(char* folder, int *tcp_port){
     socklen_t peer_addr_len;
     int fd;
 
+    peer_addr_len = sizeof(peer_addr);
     fd = accept(sock_tcp, (struct sockaddr*)&peer_addr, &peer_addr_len);
     if(fd == -1){
       if(errno != EINTR && errno != EAGAIN){

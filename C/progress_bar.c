@@ -72,8 +72,6 @@ void update_progress_bar(unsigned long progress, unsigned long target){
     // Calculate speed
     int speed_ch_idx = 0;
     double speed = (double)(progress - last_progress) / alpha_time;
-    fprintf(stderr, "%f = %lu / %f\n", speed,
-            progress - last_progress, alpha_time);
     double pspeed = speed;
     while(pspeed > 1024){
       pspeed /= 1024;
