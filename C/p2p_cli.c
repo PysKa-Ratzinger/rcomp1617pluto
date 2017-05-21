@@ -87,7 +87,7 @@ void start_cli(struct control_st *ctrl){
                 "or it's not broadcasting it's presence. Cannot list files.\n");
         }else if(answer[0] == '1'){
           unsigned short port = atoi(&answer[1]);
-          printf("What file do you want to download?\n>");
+          printf("Which file do you want to download?\n>");
           fflush(stdout);
           fgets(file, BUFFER_SIZE, stdin);
           remove_newline(file);
