@@ -139,12 +139,12 @@ unsigned long start_file_transfer(const struct in_addr bf_addr,
         }
     }while(buffer[index-1] != ':');
     buffer[index-1] = '\0';
+    file_size = atol(buffer);
+    fprintf(stderr, "File size is %llu bytes.\n", file_size);
 
     // ---------------- RECEIVE FILE -------------------------------
 
     printf("Receiving file...\n");
-
-    file_size = atol(buffer);
     remaining_nbytes = file_size;
     create_progress_bar();
     update_progress_bar(file_size - remaining_nbytes, file_size);

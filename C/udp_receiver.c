@@ -19,7 +19,7 @@
 #include "p2p_cli.h"
 
 #define BUFFER_SIZE 512
-#define DEF_IGNOREOWNADDR 1
+#define DEF_IGNOREOWNADDR 0
 
 static int pipe_in = 0, pipe_out = 0, sock_udp_recv;
 static struct peer_info* pinfo = NULL;
@@ -163,6 +163,7 @@ int start_udp_receiver(int* parent_fd_in, int* parent_fd_out){
     int nbytes;
     struct peer_info peer_info;
 
+    temp_len = sizeof(temp);
     if((nbytes = recvfrom(sock_udp_recv, buffer, UDP_DATAGRAM_MAX_SIZE, 0,
       (struct sockaddr*)&temp, &temp_len)) > 0){
       int err;

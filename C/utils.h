@@ -1,5 +1,6 @@
 #pragma once
 #include <stdlib.h>
+#include <time.h>
 
 /*******************************************************************
  *
@@ -44,3 +45,35 @@ size_t remove_newline(char* string);
  *  returned.
  */
 size_t remove_n_newline(char* string, size_t string_size);
+
+/**
+ *    Compares two timespec structures and returns 0 if they are equal, 1 if
+ *  the second timespec is after the first one and -1 if the first timespec
+ *  is after the second.
+ */
+int compare_timespec(struct timespec* time1, struct timespec* time2);
+
+/**
+ *    Substracts optime to basetime.
+ *    If an error occurs, -1 is returned.
+ */
+int substract_timespec(struct timespec* basetime, struct timespec* optime);
+
+/**
+ *    Adds optime to bastime.
+ *    If an error occurs, -1 is returned.
+ */
+int add_timespec(struct timespec* basetime, struct timespec* optime);
+
+/**
+ *    Initializes timeres variable to the value of one second divided by
+ *  updates_per_sec.
+ */
+int init_timeres(struct timespec* timeres, int updates_per_sec);
+
+/**
+ *    Converts a struct timespec information to a double. The value of the
+ *  double will be equivalent to the number of seconds represented by the
+ *  timeres passed as an argument.
+ */
+double timeres_to_double(struct timespec* timeres);

@@ -143,7 +143,8 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   size_t real_filesize = ftell(file_fd);
   fseek(file_fd, 0L, SEEK_SET);
 
-  ssize_t res = snprintf(buffer, BUFFER_SIZE, "%lu:", real_filesize);
+  ssize_t res = snprintf(buffer, BUFFER_SIZE, "%lu:",
+                (long unsigned) real_filesize);
   if(res < 0){
     perror("snprintf");
     fclose(file_fd);
@@ -154,7 +155,7 @@ void handle_request(int fd, struct sockaddr_storage *peer_addr,
   // ------------- Sends file size --------------------------
 
   index = 0;
-  while(index < res){
+  while(index < (unsigned) res){
     nbyte = send(fd, &buffer[index], res - index, 0);
     if(nbyte <= 0){
       fprintf(stderr, "(%d) Connection with client terminated "

@@ -16,11 +16,12 @@ struct file_storage* createfsinfo(char* folder_name){
   struct file_storage *res;
 
   res = (struct file_storage*)malloc(sizeof(struct file_storage));
+  memset(res, 0, sizeof(struct file_storage));
 
   if(res == NULL)
     return NULL;
 
-    // +1 for null terminator
+    // +1 for null terminatore
   res->f_folder = (char*)malloc(strlen(folder_name) + 1);
 
   if(res->f_folder == NULL){
@@ -162,7 +163,9 @@ struct udp_datagrams* construct_udp_data(struct main_var *vars,
     res = 0;
     has_next = 0;
     memset(curr_udp, 0, sizeof(struct udp_datagrams));
-    curr_udp->u_data = (char*) malloc(UDP_DATAGRAM_MAX_SIZE);
+    if((curr_udp->u_data = (char*) malloc(UDP_DATAGRAM_MAX_SIZE)) == NULL){
+      handle_error("malloc");
+    }
     // UDP Datagram initializer
     res += sprintf(curr_udp->u_data, "PLUTO_v%u;%hu;tport:%d;nick:%s;d",
                    CURR_VERSION, id, vars->tcp_port, vars->nickname);
@@ -183,8 +186,10 @@ struct udp_datagrams* construct_udp_data(struct main_var *vars,
     curr_udp->u_len = res;
 
     if(has_next){
-      curr_udp->u_next = (struct udp_datagrams*)
-                          malloc(sizeof(struct udp_datagrams));
+      if((curr_udp->u_next = (struct udp_datagrams*)
+                            malloc(sizeof(struct udp_datagrams))) == NULL){
+        handle_error("malloc");
+      }
       curr_udp = curr_udp->u_next;
     }
   }

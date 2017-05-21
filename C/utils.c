@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #include "utils.h"
 #include "udp_receiver.h"
@@ -75,4 +76,74 @@ size_t remove_n_newline(char* string, size_t string_size){
       }
   }
   return i+1;
+}
+
+int compare_timespec(struct timespec* time1, struct timespec* time2){
+  if(time1 == NULL || time2 == NULL)
+    return 2; // Not an expected value but... -1, 0 and 1 are taken... :(
+
+  if(time1->tv_sec == time2->tv_sec){
+    if(time1->tv_nsec == time2->tv_nsec){
+      return 0;
+    }else if(time1->tv_nsec < time2->tv_nsec){
+      return 1;
+    }else{
+      return -1;
+    }
+  }else if(time1->tv_sec < time2->tv_sec){
+    return 1;
+  }else{
+    return -1;
+  }
+}
+
+int substract_timespec(struct timespec* basetime, struct timespec* optime){
+  if(basetime == NULL || optime == NULL)
+    return -1;
+
+  basetime->tv_sec -= optime->tv_sec;
+  if(basetime->tv_nsec < optime->tv_nsec){
+    basetime->tv_sec--;
+    basetime->tv_nsec += 1000000000;
+  }
+  basetime->tv_nsec -= optime->tv_nsec;
+
+  return 0;
+}
+
+int add_timespec(struct timespec* basetime, struct timespec* optime){
+  if(basetime == NULL || optime == NULL)
+    return -1;
+
+  basetime->tv_sec += optime->tv_sec;
+  basetime->tv_nsec += optime->tv_nsec;
+  if(basetime->tv_nsec >= 1000000000){
+    basetime->tv_nsec -= 1000000000;
+    basetime->tv_sec++;
+  }
+
+  return 0;
+}
+
+int init_timeres(struct timespec* timeres, int updates_per_sec){
+  if(timeres == NULL)
+    return -1;
+
+  if(updates_per_sec <= 1){
+    timeres->tv_sec = 1;
+    timeres->tv_nsec = 0;
+  }else{
+    timeres->tv_sec = 0;
+    timeres->tv_nsec = 1000000000 / updates_per_sec;
+  }
+  fprintf(stderr, "At %d updates per sec, timeres = {%d, %ld}\n",
+                  updates_per_sec, (int)timeres->tv_sec, timeres->tv_nsec);
+  return 0;
+}
+
+double timeres_to_double(struct timespec* timeres){
+  if(timeres == NULL)
+    return 0.0;
+
+  return (double)timeres->tv_sec + ((double)timeres->tv_nsec / 1000000000);
 }
