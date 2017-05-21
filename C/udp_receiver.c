@@ -19,7 +19,7 @@
 #include "p2p_cli.h"
 
 #define BUFFER_SIZE 512
-#define DEF_IGNOREOWNADDR 0
+#define DEF_IGNOREOWNADDR 1
 
 static int pipe_in = 0, pipe_out = 0, sock_udp_recv;
 static struct peer_info* pinfo = NULL;

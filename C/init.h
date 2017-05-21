@@ -18,8 +18,8 @@
 #define BCAST_ADDRESS "255.255.255.255"
 #define APP_PORT "32033"
 #define UDP_DATAGRAM_MAX_SIZE 508 // Safe size
-#define INTERVAL 2
-#define TIMEOUT  3
+#define INTERVAL 30
+#define TIMEOUT  45
 #define MAX_TCP_CONN 5
 #define CURR_VERSION 4
 
