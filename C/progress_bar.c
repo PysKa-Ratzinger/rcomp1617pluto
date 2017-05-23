@@ -26,6 +26,8 @@ static char progress_buffer[PROGRESS_BAR_SIZE + TIME_ELAPSED_SIZE +
 static struct timespec last_update, first_update, timeres;
 static unsigned int last_progress = 0;
 static const char speed_ch[] = {' ', 'K', 'M', 'G'};
+static const char time_ch[] = {'s', 'm', 'h', 'd', 'w'};
+static const int time_mul[] = {60, 60, 24, 7};
 static double eta[NUM_ENTRIES];
 static int eta_nmemb = 0;
 static int eta_idx = 0;
@@ -103,8 +105,18 @@ void update_progress_bar(unsigned long progress, unsigned long target){
     }
     m_eta /= eta_nmemb;
 
-    snprintf(progress_buffer, sizeof(progress_buffer), "%4d %cB/s %6.2fs ",
-            (int) pspeed, speed_ch[speed_ch_idx], m_eta);
+    int m_eta_idx = 0;
+    while(m_eta_idx < 4 && m_eta > time_mul[m_eta_idx]){
+      m_eta /= time_mul[m_eta_idx];
+      m_eta_idx++;
+    }
+
+    if(m_eta_idx == 4 && m_eta > 99.9){
+      m_eta = 99.9;
+    }
+
+    snprintf(progress_buffer, sizeof(progress_buffer), "%4d %cB/s %6.2f%c ",
+            (int) pspeed, speed_ch[speed_ch_idx], m_eta, time_ch[m_eta_idx]);
     progress_buffer[TIME_ELAPSED_SIZE+SPEED_IND_SIZE] = '[';
 
     // Update information for next iteration
