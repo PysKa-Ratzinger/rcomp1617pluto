@@ -14,7 +14,7 @@
 #include "init.h"
 
 #define BUFFER_SIZE 4096
-#define NUMBER_LIMIT 10
+#define NUMBER_LIMIT 19
 
 static char *my_folder;
 
