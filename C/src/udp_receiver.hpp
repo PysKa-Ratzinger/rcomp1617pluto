@@ -9,7 +9,7 @@
  * Purpose: Define the behaviour of the udp_receiving process.
  */
 
- #include <time.h>
+#include <time.h>
 
 struct peer_info;
 
@@ -19,15 +19,15 @@ struct peer_info;
 #define NICK_MAX_DIGITS 15
 
 struct peer_info{
-  int                   p_version;
-  struct sockaddr_in    p_addr;
-  socklen_t             p_addr_len;
-  unsigned short        p_id;
-  unsigned short        p_tcp_port;
-  char*                 p_nickname;
-  struct file_info*     p_headfile;
-  time_t                p_lastupdated;
-  struct peer_info*     p_next;
+	int                   p_version;
+	struct sockaddr_in    p_addr;
+	socklen_t             p_addr_len;
+	unsigned short        p_id;
+	unsigned short        p_tcp_port;
+	char*                 p_nickname;
+	struct file_info*     p_headfile;
+	time_t                p_lastupdated;
+	struct peer_info*     p_next;
 };
 
 /**
@@ -58,7 +58,7 @@ int is_own_address(struct sockaddr_storage *temp);
  *    Updates the list of connected peers using a red-black
  */
 void update_plist(struct sockaddr_in* np_addr, socklen_t np_addr_len,
-                  struct peer_info* info, time_t abstime);
+		struct peer_info* info, time_t abstime);
 
 /**
  *    For every peer_info present in a list of known peer's, the current

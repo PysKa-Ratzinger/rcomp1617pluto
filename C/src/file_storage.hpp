@@ -17,21 +17,21 @@ struct file_storage;
 
 #define FILENAME_SIZE 256
 
- /**
-  *    file_info structure
-  *  Used to save important information regarding some files
-  *
-  *  Members:
-  *    f_bytes   Number of bytes needed to represent the file name
-  *    f_name    The name of the file
-  *    f_next    Pointer to the next file_info structure or NULL if there
-  *                isn't one
-  */
- struct file_info{
-   int               f_bytes;  // We need this of UDP broadcasting
-   char*             f_name;
-   struct file_info* f_next;
- };
+/**
+ *    file_info structure
+ *  Used to save important information regarding some files
+ *
+ *  Members:
+ *    f_bytes   Number of bytes needed to represent the file name
+ *    f_name    The name of the file
+ *    f_next    Pointer to the next file_info structure or NULL if there
+ *                isn't one
+ */
+struct file_info{
+	int               f_bytes;  // We need this of UDP broadcasting
+	char*             f_name;
+	struct file_info* f_next;
+};
 
 /**
  *    file_storage structure
@@ -44,8 +44,8 @@ struct file_storage;
  *                  are no files in this folder
  */
 struct file_storage{
-  char*             f_folder;
-  struct file_info* f_headfile; // First file of the linked list
+	char*             f_folder;
+	struct file_info* f_headfile; // First file of the linked list
 };
 
 /**
@@ -53,7 +53,7 @@ struct file_storage{
  */
 struct udp_datagrams{
 	char*                 u_data;
-  size_t                u_len;
+	size_t                u_len;
 	struct udp_datagrams* u_next;
 };
 
@@ -121,8 +121,8 @@ void printflistinfo(struct file_info* head_file);
  *  is truncated and an error message is sent to 'stderr'.
  */
 struct udp_datagrams* construct_udp_data(struct main_var *vars,
-                                        struct file_storage* storage,
-                                        unsigned short id);
+		struct file_storage* storage,
+		unsigned short id);
 
 /**
  *    Frees the memory allocated for the udp_datagrams
@@ -133,4 +133,4 @@ void free_udp_datagrams(struct udp_datagrams* target);
  *    Parses the information of a UDP datagram.
  */
 int parse_datagram(char *buffer, size_t buffer_max_size,
-                  struct peer_info *peer_info);
+		struct peer_info *peer_info);

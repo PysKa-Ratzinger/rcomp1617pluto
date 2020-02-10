@@ -10,9 +10,9 @@
  *            interact with the user.
  */
 
- #include "init.hpp"
+#include "init.hpp"
 
 /**
  *    Starts the command line interface
  */
- void start_cli(struct control_st *ctrl);
+void start_cli(struct control_st *ctrl);
