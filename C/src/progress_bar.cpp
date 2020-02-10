@@ -4,8 +4,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "progress_bar.h"
-#include "utils.h"
+#include "progress_bar.hpp"
+#include "utils.hpp"
 
 #define TERMINAL_SIZE           80
 #define PROGRESS_BAR_SIZE       50    // [####-------...-----]
@@ -55,7 +55,7 @@ void create_progress_bar(){
     memcpy(&first_update, &last_update, sizeof(struct timespec));
     init_timeres(&timeres, UPDATES_PER_SEC);
     last_progress = 0;
-    printf("\e[s");
+    printf("\x1B[s");
     update_progress_bar(0, 1);
 }
 
@@ -126,7 +126,7 @@ void update_progress_bar(unsigned long progress, unsigned long target){
     for(i=0; i<whitespace; i++){
         printf(" ");
     }
-    printf("%s\e[u", progress_buffer);
+    printf("%s\x1B[u", progress_buffer);
     fflush(stdout);
     if(progress == target){
       printf("\n");

@@ -9,9 +9,9 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-#include "server.h"
-#include "file_storage.h"
-#include "init.h"
+#include "server.hpp"
+#include "file_storage.hpp"
+#include "init.hpp"
 
 #define BUFFER_SIZE 4096
 #define NUMBER_LIMIT 19

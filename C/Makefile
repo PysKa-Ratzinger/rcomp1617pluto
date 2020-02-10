@@ -1,14 +1,28 @@
-CC=gcc
-CFLAGS=-W -Wall -Wextra -Werror -Wfatal-errors -g
-LDLIBS=-lpthread -lrt
-OBJECTS=main.o init.o fork_utils.o file_storage.o broadcast.o utils.o udp_receiver.o p2p_cli.o server.o client.o progress_bar.o
+CC=g++
+CFLAGS=-O2 -Wall -Wextra -Werror -pedantic-errors -g `pkg-config --cflags gtkmm-3.0`
+LDFLAGS=-lncurses `pkg-config --libs gtkmm-3.0` -lpthread
 
-main: $(OBJECTS)
+SRCDIR = ./src
+OBJDIR = ./build
+BINDIR = ./bin
+TARGET = main
 
-%.o: %.c %.h
+SOURCES = $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/**/*.cpp $(SRCDIR)/**/**/*.cpp)
+OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 
-run: main
-	./main
+dir_guard=@mkdir -p $(@D)
+
+$(BINDIR)/$(TARGET): $(OBJECTS)
+	$(dir_guard)
+	$(CC) $+ -o $@ $(LDFLAGS)
+
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+	$(dir_guard)
+	$(CC) $(CFLAGS) -c $< -I./src -o $@
+
+run: $(BINDIR)/$(TARGET)
+	$(BINDIR)/$(TARGET) ${ARGS}
 
 clean:
-	rm -fv *.o *.gch main
+	rm -rvf $(BINDIR) $(OBJDIR)
+

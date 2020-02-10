@@ -5,10 +5,10 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#include "init.h"
-#include "client.h"
-#include "utils.h"
-#include "progress_bar.h"
+#include "init.hpp"
+#include "client.hpp"
+#include "utils.hpp"
+#include "progress_bar.hpp"
 
 #define BUFFER_SIZE   4096
 #define MAX_FILE_SIZE 19

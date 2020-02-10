@@ -3,8 +3,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "utils.h"
-#include "udp_receiver.h"
+#include "utils.hpp"
+#include "udp_receiver.hpp"
 
 int num_places(unsigned int n){
   if (n < 10) return 1;

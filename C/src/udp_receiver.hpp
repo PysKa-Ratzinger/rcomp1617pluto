@@ -13,8 +13,8 @@
 
 struct peer_info;
 
-#include "init.h"
- #include "file_storage.h"
+#include "init.hpp"
+#include "file_storage.hpp"
 
 #define NICK_MAX_DIGITS 15
 

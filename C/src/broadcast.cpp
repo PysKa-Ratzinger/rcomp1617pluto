@@ -11,12 +11,12 @@
 #include <signal.h>
 #include <semaphore.h>
 
-#include "utils.h"
-#include "synchronize.h"
-#include "file_storage.h"
-#include "broadcast.h"
-#include "init.h"
-#include "udp_receiver.h"
+#include "utils.hpp"
+#include "synchronize.hpp"
+#include "file_storage.hpp"
+#include "broadcast.hpp"
+#include "init.hpp"
+#include "udp_receiver.hpp"
 
 static struct file_storage *storage;
 static struct control_st *m_ctrl;

@@ -14,13 +14,13 @@
 #include <fcntl.h>
 #include <ifaddrs.h>
 
-#include "init.h"
-#include "synchronize.h"
-#include "broadcast.h"
-#include "utils.h"
-#include "udp_receiver.h"
-#include "p2p_cli.h"
-#include "server.h"
+#include "init.hpp"
+#include "synchronize.hpp"
+#include "broadcast.hpp"
+#include "utils.hpp"
+#include "udp_receiver.hpp"
+#include "p2p_cli.hpp"
+#include "server.hpp"
 
 #define BUFFER_SIZE 256
 

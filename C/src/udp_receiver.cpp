@@ -11,12 +11,12 @@
 #include <sys/stat.h>
 #include <ifaddrs.h>
 
-#include "udp_receiver.h"
-#include "init.h"
-#include "synchronize.h"
-#include "broadcast.h"
-#include "udp_receiver.h"
-#include "p2p_cli.h"
+#include "udp_receiver.hpp"
+#include "init.hpp"
+#include "synchronize.hpp"
+#include "broadcast.hpp"
+#include "udp_receiver.hpp"
+#include "p2p_cli.hpp"
 
 #define BUFFER_SIZE 512
 #define DEF_IGNOREOWNADDR 1

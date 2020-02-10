@@ -10,7 +10,7 @@
  *            interact with the user.
  */
 
- #include "init.h"
+ #include "init.hpp"
 
 /**
  *    Starts the command line interface

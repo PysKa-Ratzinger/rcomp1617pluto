@@ -12,8 +12,8 @@
 struct file_info;
 struct file_storage;
 
-#include "init.h"
-#include "udp_receiver.h"
+#include "init.hpp"
+#include "udp_receiver.hpp"
 
 #define FILENAME_SIZE 256
 

@@ -6,12 +6,12 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "init.h"
-#include "p2p_cli.h"
-#include "broadcast.h"
-#include "utils.h"
-#include "synchronize.h"
-#include "client.h"
+#include "init.hpp"
+#include "p2p_cli.hpp"
+#include "broadcast.hpp"
+#include "utils.hpp"
+#include "synchronize.hpp"
+#include "client.hpp"
 
 #define BUFFER_SIZE 512
 
